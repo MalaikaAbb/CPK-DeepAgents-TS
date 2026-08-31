@@ -26,13 +26,23 @@ function YourMainContent() {
   };
 
 
+  // Same reason as the Reading route: printing `agent.state` raw buries
+  // `language` under the entire message transcript.
+  const { messages: _messages, ...stateFields } = agent.state as Record<
+    string,
+    unknown
+  >;
+
   return (
-    <div className="p-6">
+    <div className="flex h-full min-h-0 flex-col p-6">
       <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
         Your main content
       </h1>
       <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-        Language: <strong>{language}</strong>
+        Language:{" "}
+        <strong className="rounded bg-[var(--accent)]/10 px-1.5 py-0.5 text-[var(--accent)]">
+          {language}
+        </strong>
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -45,8 +55,8 @@ function YourMainContent() {
         
       </div>
 
-      <pre className="mt-4 overflow-x-auto rounded-lg bg-slate-100 p-3 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-        {JSON.stringify(agent.state, null, 2)}
+      <pre className="mt-4 min-h-0 flex-1 overflow-auto rounded-lg bg-slate-100 p-3 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+        {JSON.stringify(stateFields, null, 2)}
       </pre>
     </div>
   );

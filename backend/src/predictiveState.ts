@@ -27,6 +27,9 @@ export const observedStepsMiddleware = createMiddleware({
 //#endregion
 
 //#region prebuilt-agent
+import { ToolMessage } from "@langchain/core/messages";
+import type { ToolRuntime } from "@langchain/core/tools";
+import { Command } from "@langchain/langgraph";
 import { createDeepAgent } from "deepagents";
 import {
   stateStreamingMiddleware,
@@ -36,11 +39,48 @@ import { tool } from "langchain";
 
 import { MODEL } from "./shared.js";
 
-const stepProgressTool = tool(async (args) => args, {
-  name: "step_progress_tool",
-  description: "Reports the current steps being executed",
-  schema: z.object({ steps: z.array(z.string()) }),
-});
+const StepProgressSchema = z.object({ steps: z.array(z.string()) });
+
+/**
+ * The page prints this tool as `tool(async (args) => args, ...)`, and that is
+ * exactly the shape that leaves the panel empty.
+ *
+ * `stateStreamingMiddleware` streams the `steps` argument into `observed_steps`
+ * while the model is still writing it, but a streamed value is a *prediction*:
+ * it lives on the run, not in the thread. When the node returns, LangGraph
+ * writes the node's own update over it, and a tool that returns its arguments
+ * contributes no `observed_steps` — so the key reverts to its `[]` default the
+ * moment the stream ends. Measured: the list filled during generation and was
+ * blank again by the time the reply finished.
+ *
+ * Returning a `Command` is what makes the prediction stick, and it is the same
+ * correction the Tool Rendering and custom-graph variants of this page already
+ * carry. The `ToolMessage` is mandatory alongside it: a `Command` replaces the
+ * tool's normal return value, so without one OpenAI sees a `tool_call` with no
+ * matching result and rejects the next turn.
+ */
+const stepProgressTool = tool(
+  (
+    input: { steps: string[] },
+    runtime: ToolRuntime<typeof StepProgressSchema>,
+  ) =>
+    new Command({
+      update: {
+        observed_steps: input.steps,
+        messages: [
+          new ToolMessage({
+            content: "Steps recorded to shared state.",
+            tool_call_id: runtime.toolCallId,
+          }),
+        ],
+      },
+    }),
+  {
+    name: "step_progress_tool",
+    description: "Reports the current steps being executed",
+    schema: StepProgressSchema,
+  },
+);
 
 export const agent = createDeepAgent({
   model: MODEL,

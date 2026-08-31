@@ -4,45 +4,44 @@ import { type PageActionHandler, type PageRecordConfig } from '../core/types';
 import { sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
 
 /**
- * PARTIAL page, and the recording is meant to show why.
+ * State Rendering, where the thing worth filming is not the reply.
  *
- * The doc page's `agent.py` block contains React code rather than Python, so it
- * never defines the state model or the tool that writes `searches`. The React
- * half is implemented exactly as documented and is genuinely reactive -- but it
- * is pointed at `my_agent`, which has no state at all, so the list stays empty.
+ * `report_research_progress` writes a `searches` array and
+ * `stateStreamingMiddleware` mirrors it into `agent.state` as the model is
+ * still writing the argument, so the left pane fills task by task while the
+ * chat is mid-answer and each ⏳ flips to ✅ on the closing call. All of that
+ * happens *beside* the message column.
  *
- * That means the pass condition is deliberately *not* "the list filled". It is
- * "the agent replied and the panel rendered its empty state without throwing".
- * The cursor rests on the warning banner and the raw `agent.state` pane so the
- * video shows the gap rather than looking like a broken demo.
- *
- * See `backend/agents/search_agent.py` and README §9.1.
+ * The standard action ends by gliding onto the finished assistant message,
+ * which is the wrong half of the screen for this page: the cursor lands on
+ * prose while the panel the route exists to demonstrate sits unattended. This
+ * one shows the empty panel first, sends the prompt, and returns to the panel
+ * afterwards so the before/after is legible.
  */
-const WARNING = 'div:has-text("contains React code")';
+const SEARCHES_PANEL = 'h1:has-text("Research progress")';
+
+async function restOnSearchesPanel(page: Page): Promise<void> {
+  const heading = page.locator(SEARCHES_PANEL).first();
+  const box = await heading.boundingBox().catch(() => null);
+  if (box) {
+    await humanGlide(page, box.x + box.width / 2, box.y + box.height + 80, 22);
+  } else {
+    await humanGlide(page, 360, 220, 22);
+  }
+  await sleep(2000);
+}
 
 export const runStateRenderingAction: PageActionHandler = async (
   page: Page,
   config: PageRecordConfig,
 ) => {
-  console.log(`   [State Rendering] Showing the documented gap before prompting...`);
-  const warning = page.locator(WARNING).last();
-  if (await warning.isVisible({ timeout: 5000 }).catch(() => false)) {
-    const box = await warning.boundingBox();
-    if (box) {
-      await humanGlide(page, box.x + box.width / 2, box.y + box.height / 2, 22);
-      await sleep(2500);
-    }
-  }
+  console.log(`   [State Rendering] Showing the empty searches panel...`);
+  await restOnSearchesPanel(page);
 
-  console.log(`   [State Rendering] Prompting -- the reply arrives, the list does not fill...`);
+  console.log(`   [State Rendering] Prompting -- the panel fills as it answers...`);
   const msgCount = await sendPrompt(page, config.prompt, { timeoutMs: 12000 });
-
-  // The chat is an ordinary CopilotChat, so the shared detector applies: a page
-  // that never answers still fails, which is the part that can actually break.
   await waitForAgentResponseCompletion(page, config.waitAfterPromptMs ?? 4000, msgCount);
 
-  // Rest on the raw state pane -- empty `{}` is the evidence, not a glitch.
-  console.log(`   [State Rendering] Resting on the raw agent.state pane...`);
-  await humanGlide(page, 420, 620, 22);
-  await sleep(2500);
+  console.log(`   [State Rendering] Resting on the completed task list...`);
+  await restOnSearchesPanel(page);
 };

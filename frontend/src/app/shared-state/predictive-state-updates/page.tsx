@@ -33,24 +33,46 @@ export default function Page() {
           mappings from a tool argument to a state key. Nothing calls an emit
           function: the middleware parses the model&apos;s partial tool-call
           arguments as they stream and writes each completed element into state.
-          The tool body is <code>async (args) =&gt; args</code> on purpose — it
-          exists to give the model an argument shape to fill in.
+        </p>
+        <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+          The page writes the tool body as{" "}
+          <code>async (args) =&gt; args</code>, on the reading that it only has
+          to give the model an argument shape to fill in. That is the one line
+          that has to change: a streamed value is a <em>prediction</em> scoped
+          to the run, and a tool returning its arguments contributes no{" "}
+          <code>observed_steps</code> — so the node&apos;s own update wipes the
+          list the instant the stream ends. Measured: the panel filled during
+          generation and was blank again by the time the reply finished. The
+          tool here returns a <code>Command</code> instead, which is the same
+          correction both custom-graph variants below already carry.
         </p>
         <div className="mt-4">
           <TryIt
             prompts={[
-              "Plan and execute a website redesign",
-              "Do a competitive analysis of three note-taking apps",
+              "Plan a 4-step process for onboarding a new customer, reporting each step as you go.",
+              "Plan a 4-step process for reviewing a support ticket backlog, reporting each step as you go.",
             ]}
             expect={
               <>
                 Step rows appear on the left one at a time, while the model is
                 still writing them — noticeably before the chat message
-                completes.
+                completes — and are still there once it has.
               </>
             }
-            fail="All rows appearing at once, after the reply, means the streaming middleware did not intercept and you are seeing the ordinary end-of-node state sync."
+            fail="All rows appearing at once, after the reply, means the streaming middleware did not intercept and you are seeing the ordinary end-of-node state sync. Rows that fill and then vanish mean the tool stopped returning a Command."
           />
+        </div>
+        <div className="mt-4">
+          <Callout tone="warn" title="Keep the task away from anything file-shaped">
+            <p>
+              This variant is a real Deep Agent, so it has the filesystem and
+              planning tools that come with one. Ask it to &ldquo;execute a
+              website launch checklist&rdquo; and it will spend the run
+              globbing for files that do not exist and report each failed
+              search as a step. An abstract multi-step task keeps the demo on
+              the mechanism.
+            </p>
+          </Callout>
         </div>
         <div className="mt-4">
           <SourceCodeGroup

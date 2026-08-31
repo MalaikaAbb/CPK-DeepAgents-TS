@@ -20,17 +20,33 @@ function YourMainContent() {
 
   const language = (agent.state.language as string) ?? "Not Set";
 
+  // `agent.state` carries the whole message history alongside the agent's own
+  // fields. Printed raw it is thousands of lines of OpenAI response metadata,
+  // which pushes `language` off screen and buries the one value this page is
+  // about — so the transcript is dropped and only the state fields are shown.
+  const { messages: _messages, ...stateFields } = agent.state as Record<
+    string,
+    unknown
+  >;
+
   return (
-    <div className="p-6">
+    <div className="flex h-full min-h-0 flex-col p-6">
       <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
         Your main content
       </h1>
       <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-        Language: <strong>{language}</strong>
+        Language:{" "}
+        <strong className="rounded bg-[var(--accent)]/10 px-1.5 py-0.5 text-[var(--accent)]">
+          {language}
+        </strong>
+      </p>
+      <p className="mt-2 text-xs text-slate-500">
+        Nothing here writes this value. Ask the chat to switch language and it
+        changes as the agent&apos;s state delta arrives.
       </p>
 
-      <pre className="mt-4 overflow-x-auto rounded-lg bg-slate-100 p-3 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-        {JSON.stringify(agent.state, null, 2)}
+      <pre className="mt-4 min-h-0 flex-1 overflow-auto rounded-lg bg-slate-100 p-3 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+        {JSON.stringify(stateFields, null, 2)}
       </pre>
     </div>
   );

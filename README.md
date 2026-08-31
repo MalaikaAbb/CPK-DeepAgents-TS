@@ -167,14 +167,14 @@ Proves the whole stack in one message: a Deep Agent with a single `tool()` call,
 
 **`/generative-ui/state-rendering`** → `state_rendering_agent`
 `copilotkitEmitState` pushes state mid-node so a slow task reports progress; `useAgent` renders it outside the chat.
-*Try:* `Research why the sky is blue`
-*Pass:* three rows appear at once, all ⏳, then flip to ✅ one per second, and stay after the reply. Verified on the wire: four distinct `searches` states arrive in order.
-*Fail:* rows that appear then vanish — the emitted state was never returned by the node.
+*Try:* `Research the best coffee shops in Tokyo`
+*Pass:* a handful of task rows appear while the answer is still streaming, all ⏳, then flip to ✅ on the agent's closing `report_research_progress` call, and stay after the reply.
+*Fail:* rows that appear then vanish — the emitted state was never returned by the node. Rows that never reach ✅ mean the closing call was skipped; that is what `gpt-4o` does here, and why this one agent pins the page's own `gpt-5.4`.
 
 **`/generative-ui/your-components/interrupt-based`** → `interrupt_agent`, `interrupt_multi_agent` ⚠️
 LangGraph `interrupt()` in a `createMiddleware` `beforeModel` hook, answered by `useInterrupt`. Two tabs: one interrupt, and two dispatched by `type` via `enabled`. Both are the page's code **as printed** — the second one does not work, and demonstrating that is the point.
-*Try:* send `Hello`.
-*Pass:* on **One interrupt**, the first message is answered with a name form rather than a reply; submit a name and the run resumes using it. That half of the page is correct.
+*Try:* send `Hello`, then answer the form that appears.
+*Pass:* on **One interrupt**, the first message is answered with a name form rather than a reply; submit a name and the run resumes using it. That half of the page is correct. Note that the reply only exists *because* the form was answered — a recorder or test that types and then waits for an assistant message will hang here, because the graph is parked, not broken.
 *Expected failure:* on **Two, dispatched by type**, no card appears at all — the `enabled` predicates throw on `eventValue`, so neither handler claims the event.
 *Real failure:* the *first* tab not working — check the agent server is up.
 
@@ -190,9 +190,9 @@ A tool whose body runs in the browser. The backend defines no tool at all.
 
 **`/shared-state/in-app-agent-read`** → `shared_state_agent`
 Reading agent state as ordinary reactive React state.
-*Try:* `Hello`
-*Pass:* after the first message the left panel reads `Language: english` and the JSON dump shows a `language` key.
-*Fail:* a dump with everything except `language` — the field lost its `zodState` wrapper.
+*Try:* `Switch to Spanish`, then `What can you help me with?`
+*Pass:* the panel starts at `Language: english`; the first turn flips it to `spanish` as the state delta lands, and the second reply arrives in Spanish. The JSON pane shows the agent's own fields — the message transcript is filtered out of it, or `language` would be thousands of lines down.
+*Fail:* a dump with everything except `language` — the field lost its `zodState` wrapper. A panel that never moves means `set_language` was not called; see [§9 item 13](#9-known-issues--docvsimplementation-discrepancies).
 
 **`/shared-state/in-app-agent-write`** → `shared_state_agent` ⚠️
 `agent.setState` from the app, plus `agent.runAgent` to re-run immediately.
@@ -202,7 +202,7 @@ Reading agent state as ordinary reactive React state.
 
 **`/shared-state/predictive-state-updates`** → `predictive_state_agent`, `predictive_manual_graph`, `predictive_tool_graph`
 **All three of the page's variants are live here**, behind a toggle — the sharpest advantage this repo has over the Python sibling, whose tabs only sketch the custom graphs.
-*Try:* `Plan and execute a website redesign` on each tab.
+*Try:* `Plan a 4-step process for onboarding a new customer, reporting each step as you go.` on each tab. Keep the task away from anything file-shaped — the prebuilt variant is a Deep Agent and will go hunting for real files if the wording invites it.
 *Pass:* **Prebuilt** — step rows appear one at a time *before* the chat message completes. **Custom · manual** — exactly four fixed rows, one per second, then an ordinary answer (verified: four distinct states in order). **Custom · tool** — steps stream as the model writes the tool call, then a `ToolNode` runs it and the graph loops back.
 *Fail:* nothing at all — the provider is `<CopilotKitProvider>` rather than `<CopilotKit>`; see [§9 item 5](#9-known-issues--docvsimplementation-discrepancies).
 
@@ -291,7 +291,13 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 `npm install @copilotkit/react-ui @copilotkit/react-core @copilotkit/runtime`, but every import it then writes is from `@copilotkit/react-core/v2`. `@copilotkit/react-ui` is the v1 UI package; not installed here.
 
 **12. Model ids vary across pages.**
-`openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+`openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o` — with one deliberate exception. `state_rendering_agent` pins `openai:gpt-5.4`, the id its own page prints, because the route depends on the model making a *second* tool call to mark its tasks done and `gpt-4o` consistently makes only the first. Measured on both.
+
+**13. Neither shared-state page has anything that writes the field from the agent's side.**
+[in-app-agent-read](https://docs.copilotkit.ai/deepagents/shared-state/in-app-agent-read) shows a `language` field and a panel that reflects it, and stops there. The Writing route has the browser's `agent.setState`; the Reading route has nothing at all, so "switch to Spanish" changed the prose and left the field on `english` — the panel the page exists to demonstrate never moved. A `set_language` tool returning a `Command` (plus its own `ToolMessage`, per item 9) is the glue added here.
+
+**14. The prebuilt Predictive State Updates tool, as printed, cannot persist anything.**
+[predictive-state-updates?agent-type=prebuilt](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates?agent-type=prebuilt) writes `tool(async (args) => args, …)`. `stateStreamingMiddleware` streams the `steps` argument into `observed_steps` while the model writes it, but that is a *prediction* scoped to the run: when the node returns, LangGraph writes the node's own update over it, and a tool returning its arguments contributes no `observed_steps`. Measured — the list filled during generation and was empty again by the time the reply finished. Returning a `Command` fixes it, which is the same correction both custom-graph variants on the same page already carry.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -321,6 +327,7 @@ The Deep Agents doc tree has **no** Troubleshooting section as of 2026-08-06. Wh
 | `npm install` in `backend/` fails with `ERESOLVE` / zod | `deepagents` wants zod v4, `@copilotkit/sdk-js` peers on v3. | Keep the pinned `zod@^3.25.76` in `package.json` — §9 item 1. |
 | `Failed to create thread: HTTP 422: Invalid thread ID: must be a UUID` | Something posted a non-UUID `threadId`. | Use `crypto.randomUUID()`. |
 | Chat shows an error banner; agent log is silent | The runtime cannot reach `:8124`. | Is the dev server running? `curl http://localhost:8124/ok`. Check `LANGGRAPH_DEPLOYMENT_URL`. |
+| First message to a custom-graph route hangs ~30s, then answers | The dev server infers a hand-built `StateGraph`'s schema on the first `GET /assistants/{id}/schemas`, and the run POST waits on it. Deep Agents are unaffected — their state is already a Zod schema. | One-off per graph per server process. Warm it with `curl -s -o /dev/null http://localhost:8124/assistants/<graph_id>/schemas`. The recorder does this for every published graph at startup (`autorecorder/actions/warm-agent-schemas.ts`); without it the first recording of a cold graph fails at the 30s response budget looking like a dead backend. |
 | Agent runs but every reply is an auth error | `OPENAI_API_KEY` missing. | It goes in **`backend/.env`**, not `frontend/.env.local`. |
 | A route 500s with "Agent … not found" | Graph id mismatch. | `frontend/src/lib/agents.ts` must list the same ids as `backend/langgraph.json`. |
 | Wrong language's agent answers | Both repos on one port. | This repo is 8124, the Python sibling 8123. Don't cross them. |

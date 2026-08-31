@@ -38,18 +38,25 @@ import { runStandardAction } from '../core/actions';
 import { type Page } from 'playwright';
 
 import { waitForPageReady } from './page-ready';
+import { warmAgentSchemas } from './warm-agent-schemas';
 
 import {
   runSharedStateReadAction,
 } from './shared-state.action';
 import { runFrontendToolsAction } from './frontend-tools.action';
+import { runInterruptBasedAction } from './interrupt-based.action';
+import { runPredictiveStateAction } from './predictive-state.action';
+import { runStateRenderingAction } from './state-rendering.action';
 import { runToolRenderingAction } from './tool-rendering.action';
 
 /** Keys are page ids from `config/pages.config.ts`. Doctor flags any orphans. */
 export const ACTION_MAP: Record<string, PageActionHandler> = {
   "generative-ui-tool-rendering": runToolRenderingAction,
+  "generative-ui-state-rendering": runStateRenderingAction,
+  "generative-ui-your-components-interrupt-based": runInterruptBasedAction,
   "frontend-tools": runFrontendToolsAction,
   "shared-state-in-app-agent-read": runSharedStateReadAction,
+  "shared-state-predictive-state-updates": runPredictiveStateAction,
 };
 
 export async function executePageAction(
@@ -64,6 +71,13 @@ export async function executePageAction(
   // typed into an unhydrated input goes nowhere. Handlers that remount a chat
   // mid-run (tab switches) call waitForDomSettled again themselves.
   await waitForPageReady(page, { label: config.id });
+
+  // The runtime builds a graph's schema on the first run against it, and for a
+  // hand-built StateGraph that can take 30s -- longer than the response
+  // detector waits, so the first page to touch a cold graph fails looking like
+  // a dead backend. Started at import; awaited here so no prompt is typed
+  // before it is paid.
+  await warmAgentSchemas();
 
   const handler = ACTION_MAP[config.id] ?? runStandardAction;
   await handler(page, config, rootPath);

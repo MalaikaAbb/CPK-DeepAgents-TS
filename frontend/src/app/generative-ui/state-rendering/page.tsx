@@ -29,12 +29,13 @@ export default function Page() {
             ]}
             expect={
               <>
-                Three rows appear at once, all ⏳, then flip to ✅ one per
-                second. They stay on screen after the reply lands — the JSON
-                dump at the bottom shows the persisted list.
+                A handful of task rows appear while the answer is still
+                streaming, all ⏳, then flip to ✅ on the agent&apos;s closing{" "}
+                <code>report_research_progress</code> call. They stay on screen
+                after the reply lands.
               </>
             }
-            fail="Rows that appear and then vanish mean the emitted state was never returned by the node. Rows that all appear ✅ at once mean the deltas were batched rather than streamed."
+            fail="Rows that appear and then vanish mean the emitted state was never returned by the node. Rows that never reach ✅ mean the closing call was skipped — that is what gpt-4o does here, and why this one agent pins the page's own gpt-5.4 rather than reading OPENAI_MODEL."
           />
         </div>
       </Panel>

@@ -23,12 +23,31 @@ function SearchesPanel() {
     (agent.state.searches as { query: string; done: boolean }[]) ?? [];
 
   return (
-     <div>
-      {searches.map((search, index) => (
-        <div key={index}>
-          {search.done ? "✅" : "⏳"} {search.query}
+    <div className="flex h-full min-h-0 flex-col p-6">
+      <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+        Research progress
+      </h1>
+      <p className="mt-1 text-xs text-slate-500">
+        Streamed from <code>agent.state.searches</code>. ⏳ flips to ✅ as the
+        agent marks each task done.
+      </p>
+
+      {searches.length === 0 ? (
+        <p className="mt-4 text-sm text-slate-400">
+          Empty. Ask the agent to research something.
+        </p>
+      ) : (
+        <div className="mt-4 space-y-2">
+          {searches.map((search, index) => (
+            <div
+              key={index}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            >
+              {search.done ? "✅" : "⏳"} {search.query}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }

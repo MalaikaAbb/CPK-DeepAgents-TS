@@ -29,15 +29,18 @@ export default function Page() {
         </p>
         <div className="mt-4">
           <TryIt
-            prompts={["Hello", "What language are you answering in?"]}
+            prompts={["Switch to Spanish", "What can you help me with?"]}
             expect={
               <>
-                The left panel reads <code>Language: english</code> after the
-                first message, and the JSON dump below it shows the full state
-                object with a <code>language</code> key.
+                The panel starts at <code>Language: english</code>. The first
+                turn flips it to <code>spanish</code> as the state delta lands,
+                and the second reply arrives in Spanish. The JSON pane below
+                shows the agent&apos;s own fields; the message transcript is
+                filtered out of it, or <code>language</code> would sit
+                thousands of lines down.
               </>
             }
-            fail="An empty JSON dump means the agent has not run yet — state is only synced once a run starts. A dump with everything except `language` means the field lost its zodState wrapper; see below."
+            fail="An empty JSON dump means the agent has not run yet — state is only synced once a run starts. A dump with everything except `language` means the field lost its zodState wrapper; see below. A panel that never moves means `set_language` was not called."
           />
         </div>
       </Panel>
@@ -53,6 +56,7 @@ export default function Page() {
         <SourceCodeGroup
           files={[
             { file: "backend/src/sharedState.ts", region: "agent-state" },
+            { file: "backend/src/sharedState.ts", region: "set-language-tool" },
             { file: "backend/src/sharedState.ts", region: "agent" },
           ]}
         />
@@ -119,6 +123,40 @@ export default function Page() {
           only Partial: the toggle changes state the LLM never reads. The
           intended remedy, <code>exposeState</code>, cannot reach the field —
           measured on that route.
+        </p>
+      </Callout>
+
+      <Callout tone="warn" title="Nothing on this page writes the field">
+        <p>
+          Both shared-state pages show a <code>language</code> field and a UI
+          that reflects it, and neither shows what ever sets it from the
+          agent&apos;s side. The Writing route has the browser&apos;s{" "}
+          <code>agent.setState</code> for that. This one had nothing, so
+          &ldquo;switch to Spanish&rdquo; only ever changed the prose — the
+          field stayed <code>english</code> and the panel this page exists to
+          demonstrate never moved.
+        </p>
+        <p className="mt-2">
+          The <code>set_language</code> tool above is the glue. It returns a{" "}
+          <code>Command</code>, because an emitted or streamed value is a
+          prediction that the node&apos;s own return overwrites — the same
+          correction the{" "}
+          <Link
+            href="/generative-ui/state-rendering"
+            className="underline underline-offset-4"
+          >
+            State Rendering
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/shared-state/predictive-state-updates"
+            className="underline underline-offset-4"
+          >
+            Predictive State Updates
+          </Link>{" "}
+          routes carry. The <code>ToolMessage</code> has to travel with it: a{" "}
+          <code>Command</code> replaces the tool&apos;s ordinary return value,
+          and OpenAI rejects a <code>tool_call</code> with no matching result.
         </p>
       </Callout>
 

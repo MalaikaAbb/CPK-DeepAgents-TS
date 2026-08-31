@@ -47,6 +47,56 @@ export const languageStateMiddleware = createMiddleware({
 // createDeepAgent({ middleware: [languageStateMiddleware, copilotkitMiddleware], ... })
 //#endregion
 
+//#region set-language-tool
+/**
+ * Not on either doc page — glue, and the Reading route does not demonstrate
+ * anything without it.
+ *
+ * Both pages show a `language` field and a UI that reflects it, but neither
+ * shows what ever *writes* it from the agent's side. The Writing route has the
+ * browser's `agent.setState` for that; the Reading route has nothing, so
+ * "Switch to Spanish" only ever changed the prose. The field stayed `english`
+ * and the panel the page exists to demonstrate never moved.
+ *
+ * A `Command` is what makes the write survive the node boundary — the same
+ * correction the State Rendering and Predictive State Updates routes carry. The
+ * `ToolMessage` has to travel with it: a `Command` replaces the tool's ordinary
+ * return value, and OpenAI rejects a `tool_call` with no matching result.
+ */
+import { ToolMessage } from "@langchain/core/messages";
+import { tool, type ToolRuntime } from "@langchain/core/tools";
+import { Command } from "@langchain/langgraph";
+
+const SetLanguageSchema = z.object({
+  language: z.enum(["english", "spanish"]),
+});
+
+const setLanguage = tool(
+  (
+    input: { language: "english" | "spanish" },
+    runtime: ToolRuntime<typeof SetLanguageSchema>,
+  ) =>
+    new Command({
+      update: {
+        language: input.language,
+        messages: [
+          new ToolMessage({
+            content: `Language set to ${input.language}.`,
+            tool_call_id: runtime.toolCallId,
+          }),
+        ],
+      },
+    }),
+  {
+    name: "set_language",
+    description:
+      "Set the conversation language in shared agent state. Call this whenever " +
+      "the user asks to switch language.",
+    schema: SetLanguageSchema,
+  },
+);
+//#endregion
+
 //#region agent
 import { createDeepAgent } from "deepagents";
 
@@ -54,10 +104,12 @@ import { MODEL } from "./shared.js";
 
 export const agent = createDeepAgent({
   model: MODEL,
-  tools: [],
+  tools: [setLanguage],
   middleware: [languageStateMiddleware, copilotkitMiddleware],
   systemPrompt:
     "You are a helpful assistant. Always answer in the language named by " +
-    "the `language` value in the current agent state.",
+    "the `language` value in the current agent state. When the user asks to " +
+    "switch language, call `set_language` first, then reply in that language. " +
+    "Answer directly — do not use the file system or planning tools.",
 });
 //#endregion

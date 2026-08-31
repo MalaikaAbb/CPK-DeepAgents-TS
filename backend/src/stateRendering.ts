@@ -133,6 +133,10 @@ const reportResearchProgress = tool(
 );
 
 export const agent = createDeepAgent({
+  // Not `MODEL`. gpt-4o reliably makes the opening report_research_progress
+  // call and then never makes the closing one, so every task sits on ⏳ for the
+  // rest of the run and the ✅ this route exists to show never appears.
+  // Measured on both; the page's own id is kept for that reason.
   model: "openai:gpt-5.4",
   tools: [reportResearchProgress],
   middleware: [
