@@ -364,4 +364,63 @@ export const PAGES = definePages([
     prompt: 'Plan a three-step research task on solar panel recycling, and report each step as you go.',
     waitAfterPromptMs: 5000,
   },
+  {
+    id: 'intelligence-quickstart',
+    name: 'Intelligence - Connect Intelligence in 5 minutes',
+    videoName: 'IntelligenceQuickstart',
+    docPath: 'intelligence/quickstart',
+    route: 'intelligence/quickstart',
+    // The doc's step 3: a plain `route.ts` with `mode: "single-route"` and one
+    // verb, where the page used to publish `[[...slug]]` and four.
+    ideFile: 'frontend/src/app/api/copilotkit-single/route.ts',
+    startLine: 1,
+    endLine: 37,
+    extraTabs: [
+      // Step 4: the matching provider flag.
+      {
+        filePath: 'frontend/src/components/single-endpoint-provider.tsx',
+        startLine: 29,
+        endLine: 46,
+      },
+    ],
+    prompt: 'Tell me a one-line joke.',
+    // The only page in this suite whose runtime route is never touched by any
+    // other take, so its first request is also the first time `next dev`
+    // compiles `/api/copilotkit-single`. On a cold CI runner that lands past
+    // the 30s default and the take fails with the agent apparently silent.
+    // `core/timeouts.ts` says the defaults suit a warm dev server and that a
+    // legitimately slow page should say so here; this is that page.
+    timeouts: { replyStartMs: 90_000 },
+    waitAfterPromptMs: 4000,
+  },
+  {
+    id: 'human-in-the-loop-governed-actions',
+    name: 'App Control - Governed Action Approval',
+    videoName: 'GovernedActions',
+    docPath: 'human-in-the-loop/governed-actions',
+    route: 'human-in-the-loop/governed-actions',
+    // The tool registration -- the half that makes the run stop.
+    ideFile: 'frontend/src/app/human-in-the-loop/governed-actions/demo-chat/page.tsx',
+    startLine: 109,
+    endLine: 148,
+    extraTabs: [
+      // The approval card the tool renders.
+      {
+        filePath: 'frontend/src/app/human-in-the-loop/governed-actions/demo-chat/page.tsx',
+        startLine: 42,
+        endLine: 103,
+      },
+    ],
+    prompt:
+      'Please send an invoice reminder to acme@example.com, but check with me before it goes out.',
+    // Two turns, because the card has two answers and only one of them was
+    // ever filmed. The first request is harmless and gets approved; the second
+    // is destructive and gets rejected, which is the half that shows the
+    // policy actually stopping something.
+    prompts: [
+      'Please send an invoice reminder to acme@example.com, but check with me before it goes out.',
+      'Now permanently delete the acme@example.com customer record, but check with me before it goes through.',
+    ],
+    waitAfterPromptMs: 6000,
+  },
 ]);

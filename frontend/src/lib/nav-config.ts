@@ -189,9 +189,10 @@ export const NAV: NavGroup[] = [
         docPath: "/deepagents/human-in-the-loop/governed-actions",
         summary:
           "Gating a side-effecting agent action behind an approval card, via useInterrupt or useHumanInTheLoop.",
-        status: "not-started",
+        status: "working",
+        hasDemo: true,
         statusNote:
-          "Tracked for drift only — no demo in this repo yet. The identical page is implemented in Agno-react and Mastra-react; all five framework prefixes serve byte-identical content, so those findings apply here unchanged.",
+          "The tool-call variant, with the page's schema unchanged — `z.record(z.unknown())` is valid on this repo's zod 3. The `useInterrupt` variant needs a backend that pauses a run and attaches `interrupt.metadata.action`, which no agent here does.",
       },
     ],
   },
@@ -264,10 +265,11 @@ export const NAV: NavGroup[] = [
         title: "Intelligence · Quickstart",
         docPath: "/deepagents/intelligence/quickstart",
         summary:
-          "Connecting an existing app to a hosted CopilotKit Intelligence project so threads persist.",
-        status: "not-started",
+          "The single-route runtime transport this page switched to: one POST mount plus `useSingleEndpoint` on the provider.",
+        status: "partial",
         statusNote:
-          "Tracked for drift only — no demo yet. Setup starts at `npx copilotkit login` and a `CPK_INTELLIGENCE_API_KEY` from a hosted Intelligence project, which is an account-scoped resource this harness does not have.",
+          "Steps 3 and 4 are implemented against a third runtime mount at `/api/copilotkit-single`. Steps 1, 2 and 5 need a `CPK_INTELLIGENCE_API_KEY` from a hosted Intelligence project, which is an account-scoped resource this harness does not have.",
+        hasDemo: true,
       },
     ],
   },
