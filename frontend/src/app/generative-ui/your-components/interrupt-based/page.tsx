@@ -2,26 +2,35 @@ import { RouteHeader } from "@/components/route-header";
 import { SourceCode, SourceCodeGroup } from "@/components/source-code";
 import { Callout, CodeBlock, Panel, TryIt } from "@/components/ui";
 
-const DOC_ENABLED = `$ npx tsc --noEmit        # with the @ts-expect-error lines removed
-
-page.tsx(138,21): error TS2339: Property 'eventValue' does not exist
-                  on type 'InterruptEvent<any>'.
-page.tsx(147,21): error TS2339: Property 'eventValue' does not exist
-                  on type 'InterruptEvent<any>'.`;
-
-const WOULD_WORK = `// what the page would need to say
+const DOC_ENABLED = `// what the page prints
 useInterrupt({
-  enabled: (event) => payloadOf(event.value).type === "ask",
+  enabled: ({ eventValue }) => eventValue.type === 'ask',
+  //          ~~~~~~~~~~~~
+  //          TS2339: Property 'eventValue' does not exist
+  //                  on type 'InterruptEvent<any>'.
   render: ({ event, resolve }) => (
-    <AskComponent question={payloadOf(event.value).content ?? ""} onAnswer={(a) => resolve(a)} />
-  ),
+    <AskComponent question={event.value.content} onAnswer={a => resolve(a)} />
+  )
 });
 
-// ...where payloadOf JSON.parses the string the runtime actually sends:
-function payloadOf(value: unknown) {
-  if (typeof value === "string") { try { return JSON.parse(value) } catch { return { content: value } } }
-  return (typeof value === "object" && value !== null) ? value : {};
-}`;
+// what the type admits: the whole event, { name, value }
+useInterrupt({
+  enabled: (event) => interruptPayload(event).type === 'ask',
+  render: ({ event, resolve }) => (
+    <AskComponent question={String(interruptPayload(event).content)} onAnswer={a => resolve(a)} />
+  )
+});`;
+
+const WIRE = `// legacy on_interrupt — the @ag-ui/langgraph default
+{ "type": "CUSTOM", "name": "on_interrupt",
+  "value": "{\\"type\\":\\"approval\\",\\"action\\":{…}}" }   // ← a string
+
+// structured — emitInterruptOutcome: true
+{ "type": "RUN_FINISHED",
+  "outcome": { "type": "interrupt", "interrupts": [
+    { "id": "e459…471", "reason": "langgraph:interrupt",
+      "metadata": { "langgraph": { "raw": { "type": "approval", "action": {…} } } } }
+  ] } }`;
 
 export default function Page() {
   return (
@@ -37,32 +46,61 @@ export default function Page() {
           answer back as that call&apos;s return value.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-          The demo has both of the page&apos;s sections behind a toggle: one
-          interrupt with a plain string, and two interrupts from a single hook
-          dispatched to different components by their <code>type</code> field
-          using <code>enabled</code>. Both are the page&apos;s code as printed —
-          the second one does not work, and that is the point of the route.
+          Two tabs. <strong>One interrupt</strong> is the page&apos;s
+          Implementation section verbatim — one <code>interrupt()</code> with a
+          plain string, answered by one <code>useInterrupt</code> with no{" "}
+          <code>enabled</code>. <strong>Two, dispatched by type</strong> is the
+          page&apos;s &ldquo;Condition UI executions&rdquo; section, rebuilt:
+          the <code>ask</code> interrupt is unchanged, and the{" "}
+          <code>approval</code> one is now a real governed action in the shape
+          the{" "}
+          <a
+            className="underline"
+            href="https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Governed Actions
+          </a>{" "}
+          page defines. A <code>wrapToolCall</code> hook intercepts{" "}
+          <code>send_email</code>, runs the outbound policy server-side, and
+          interrupts with the page&apos;s envelope — id, summary, tool,
+          reference, verdict, arguments.
         </p>
         <div className="mt-4">
           <TryIt
-            prompts={["Hello", "What is your name?"]}
+            prompts={[
+              "Hello",
+              'Email dana@acme.internal subject "Standup" body "Moved to 10am."',
+              'Email pat@partner.example subject "Invoice" body "Please pay."',
+              'Email sam@competitor.example subject "Lunch?" body "Free Thursday?"',
+            ]}
             expect={
               <>
                 On <strong>One interrupt</strong>: the first message you send is
                 answered with a name prompt instead of a reply. Type a name,
-                submit, and the run resumes with the name in thread state — that
-                half of the page works. Whether the agent then calls itself by
-                that name is a separate question the page&apos;s new section gets
-                wrong; see the state-note callout below.
+                submit, and the run resumes with the name in thread state.
+                Whether the agent then calls itself by that name is a separate
+                question the page&apos;s newest section gets wrong — see the
+                state-note callout below.
                 <br />
                 <br />
-                On <strong>Two, dispatched by type</strong>: <em>nothing</em>{" "}
-                usable. The <code>enabled</code> predicates throw, no handler
-                claims the event, and no card appears. Expected — see the
-                callout below.
+                On <strong>Two, dispatched by type</strong>: the opening turn
+                draws the blue name box (<code>type: &quot;ask&quot;</code>).
+                After that, each of the three email prompts takes a different
+                branch of the same approval card, chosen by the policy the agent
+                ran before it interrupted —{" "}
+                <code>@acme.internal</code> is <strong>allow</strong> (green
+                card, auto-approved, then <code>send_email · Done</code> in the
+                transcript), <code>@partner.example</code> is{" "}
+                <strong>require_approval</strong> (amber card with Approve and
+                Reject; Reject makes the agent say it could not send and ask what
+                to change), and <code>@competitor.example</code> is{" "}
+                <strong>deny</strong> (red card, auto-cancelled, and the agent
+                reports a policy restriction).
               </>
             }
-            fail="The first tab failing is a real problem: check the agent server is up. The second tab failing is the documented result, not a setup issue."
+            fail="No card at all on either tab means the agent server is down. A card that renders with a blank summary means the interrupt wire regressed to the legacy on_interrupt string — see the wire callout."
           />
         </div>
       </Panel>
@@ -73,11 +111,12 @@ export default function Page() {
 
       <Panel
         title="The agent"
-        description="The single-interrupt middleware, the two-interrupt one, and the two createDeepAgent calls."
+        description="The single-interrupt middleware, the governed action it approves, the two-interrupt middleware, and the two createDeepAgent calls."
       >
         <SourceCodeGroup
           files={[
             { file: "backend/src/interruptBased.ts", region: "single-interrupt" },
+            { file: "backend/src/interruptBased.ts", region: "governed-action" },
             { file: "backend/src/interruptBased.ts", region: "multi-interrupt" },
             { file: "backend/src/interruptBased.ts", region: "agents" },
           ]}
@@ -91,78 +130,103 @@ export default function Page() {
           <code>state_schema = AgentState</code> to tie them together. It used
           to print only two of those three; the 2026-09-03 doc sync filled in
           the rest, so the gap now is the number of moving parts rather than a
-          missing one.{" "}
-          <code>createMiddleware</code> carries the state schema and the{" "}
-          <code>beforeModel</code> hook in one object, so the TypeScript snippet
-          is complete as written. The page now prints the{" "}
+          missing one. <code>createMiddleware</code> carries the state schema
+          and the <code>beforeModel</code> hook in one object, so the TypeScript
+          snippet is complete as written. The page now prints the{" "}
           <code>createDeepAgent</code> call that consumes it too, so the first
-          section is copy-pasteable end to end — only the two-interrupt variant
-          below is still written to the shape the page describes rather than
-          copied from it.
+          section is copy-pasteable end to end.
         </p>
       </Callout>
 
-      <Callout tone="warn" title="The conditional snippet does not compile">
+      <Callout tone="warn" title="Three things the conditional snippet needs and does not have">
         <p>
-          Both problems are in the &ldquo;Condition UI executions&rdquo; section.
-          The first is caught by the compiler; the second is not, and was
-          confirmed against a live run.
+          All three were measured against a live run. The page&apos;s
+          &ldquo;Condition UI executions&rdquo; snippet fails on each of them
+          independently, and this route now carries the corrected form rather
+          than the printed one.
         </p>
-        <p className="mt-2">
+
+        <p className="mt-3">
           <strong>
-            <code>enabled</code> has no <code>eventValue</code>.
+            1. <code>enabled</code> has no <code>eventValue</code>.
           </strong>{" "}
           Its parameter is typed <code>InterruptEvent&lt;TValue&gt;</code> —{" "}
           <code>{"{ name, value }"}</code> — so{" "}
           <code>enabled: ({"{ eventValue }"}) =&gt; …</code> is{" "}
-          <code>TS2339: Property &apos;eventValue&apos; does not exist</code>.
+          <code>TS2339</code> at compile time. At runtime the destructure yields{" "}
+          <code>undefined</code> and reading <code>.type</code> throws;{" "}
+          <code>useInterrupt</code> catches that and treats the interrupt as
+          unclaimed, so neither card is drawn and the run sits at the interrupt
+          with nothing to answer it.
         </p>
-        <p className="mt-2">
+        <div className="mt-3">
+          <CodeBlock code={DOC_ENABLED} language="tsx" />
+        </div>
+
+        <p className="mt-3">
           <strong>
-            <code>event.value</code> is a string, not an object.
+            2. <code>event.value</code> is only an object on one of the two
+            wires.
           </strong>{" "}
-          A LangGraph <code>interrupt()</code> reaches the browser as the legacy{" "}
-          <code>on_interrupt</code> custom event, and the runtime serialises its
-          value on the way out. The wire carries{" "}
-          <code>&quot;value&quot;: &quot;{'{\\"type\\":\\"approval\\",…}'}&quot;</code>
-          , so <code>event.value.content</code> is <code>undefined</code>. Since{" "}
-          <code>TValue</code> defaults to <code>any</code> here, the compiler
-          does not catch this one.
-        </p>
-        <p className="mt-3">
-          <strong>The snippet is left in place, unedited.</strong> Each{" "}
-          <code>enabled</code> line carries a <code>@ts-expect-error</code> so
-          the repo still builds — and those annotations are the evidence, not a
-          workaround: an unused one is itself an error (<code>TS2578</code>), so
-          the fact that <code>tsc</code> passes proves the compiler is rejecting
-          both lines. Delete them and you get:
+          <code>@ag-ui/langgraph</code> still defaults to the legacy{" "}
+          <code>on_interrupt</code> custom event
+          (<code>emitInterruptOutcome: false</code>), and it JSON-stringifies a
+          non-string interrupt value on the way out — so{" "}
+          <code>event.value.content</code> is <code>undefined</code> and the
+          card renders blank. <code>TValue</code> defaults to <code>any</code>,
+          so the compiler does not catch this one.
         </p>
         <div className="mt-3">
-          <CodeBlock code={DOC_ENABLED} language="text" />
+          <CodeBlock code={WIRE} language="json" />
         </div>
         <p className="mt-3">
-          What the page would have to say instead — the predicate taking the
-          whole event, and something that parses the string the runtime actually
-          sends:
+          This route opts <code>interrupt_multi_agent</code> into the structured
+          outcome in the runtime route, which is also what makes{" "}
+          <code>cancel()</code> mean anything — on the legacy wire it only
+          dismisses the card locally, with a console warning, and the Governed
+          Actions page&apos;s <code>deny</code> path is built on it. The
+          single-interrupt graph is deliberately left on the legacy wire so its
+          tab stays true to the snippet the page prints. The demo reads both
+          through one <code>interruptPayload</code> helper, so the components do
+          not care which wire they are on.
         </p>
-        <div className="mt-3">
-          <CodeBlock code={WOULD_WORK} language="tsx" />
-        </div>
+
         <p className="mt-3">
-          The page&apos;s <em>first</em> section is unaffected: it passes{" "}
-          <code>interrupt()</code> a plain string, so <code>event.value</code> is
-          that string and the snippet is right.
+          <strong>
+            3. Two <code>useInterrupt</code> hooks fight over one slot.
+          </strong>{" "}
+          <code>renderInChat</code> defaults to true, and publishing into the
+          chat goes through a single field on the CopilotKit instance
+          (<code>setInterruptElement</code>) — last writer wins. With two hooks
+          mounted, the second one&apos;s effect runs after the first&apos;s and
+          overwrites it with <code>null</code> whenever its own predicate does
+          not match, so the <em>first</em> hook&apos;s card is never shown. The
+          page shows two hooks side by side and says nothing about this. The fix
+          is <code>renderInChat: false</code> on both and placing the returned
+          elements yourself, which is what the demo does.
         </p>
       </Callout>
 
-      <Callout tone="warn" title="The second state schema is elided">
+      <Callout tone="info" title="Where this departs from the page, and why">
         <p>
-          <code>approvalAndNameMiddleware</code> is printed with both{" "}
-          <code>agentName</code> and <code>approval</code> on its{" "}
-          <code>stateSchema</code>, which is more than the Python tab manages —
-          there the equivalent class is replaced by the comment{" "}
-          <code>&quot;... your full state definition&quot;</code>. Nothing to fix
-          on this side.
+          The <code>approval</code> interrupt is not the page&apos;s. As printed
+          it is raised from <code>beforeModel</code> with a hardcoded{" "}
+          <code>&quot;please approve&quot;</code> and no guard, so every model
+          call in the run stops for another approval — including the one that
+          follows the approval — and the thing being approved is never named. It
+          demonstrates <code>enabled</code> and nothing else.
+        </p>
+        <p className="mt-2">
+          Moving it to <code>wrapToolCall</code> attaches the approval to the
+          action it is approving, which is what the Governed Actions page is
+          about and what makes its guardrails testable: the policy verdict is
+          computed server-side before the card is shown, the action id is the
+          tool call id (stable across the replay that resuming an interrupt
+          performs, so an approval cannot be matched to a different proposal),
+          and the agent re-checks the id and the policy reference before the tool
+          runs. The <code>ask</code> interrupt is untouched, so the{" "}
+          <code>enabled</code> dispatch the section is actually about is still
+          what the tab exercises.
         </p>
       </Callout>
 
@@ -187,10 +251,9 @@ export default function Page() {
           that object is scoped to the <em>declaring</em> middleware&apos;s{" "}
           <code>stateSchema</code>. The CopilotKit middleware declares{" "}
           <code>copilotKitStateSchema</code>, so it sees <code>messages</code>{" "}
-          and <code>copilotkit</code> and nothing else.{" "}
-          <code>agentName</code> lives on <code>agentNameMiddleware</code>, so
-          no state note is built and the system prompt reaches the model
-          unchanged.
+          and <code>copilotkit</code> and nothing else. <code>agentName</code>{" "}
+          lives on <code>agentNameMiddleware</code>, so no state note is built
+          and the system prompt reaches the model unchanged.
         </p>
         <p className="mt-2">
           Measured against <code>@copilotkit/sdk-js</code> 1.66.2 with a fake
@@ -201,13 +264,23 @@ export default function Page() {
           <code>exposeState: true</code>. The interrupt itself is unaffected:
           the run suspends, resumes, and the name lands in thread state where
           the frontend can read it.{" "}
-          <a
-            className="underline"
-            href="/shared-state/in-app-agent-read"
-          >
+          <a className="underline" href="/shared-state/in-app-agent-read">
             The Reading agent state route
           </a>{" "}
           hit the same wall from the other direction.
+        </p>
+      </Callout>
+
+      <Callout tone="warn" title="The second state schema is elided">
+        <p>
+          <code>approvalAndNameMiddleware</code> is printed with both{" "}
+          <code>agentName</code> and <code>approval</code> on its{" "}
+          <code>stateSchema</code>, which is more than the Python tab manages —
+          there the equivalent class is replaced by the comment{" "}
+          <code>&quot;... your full state definition&quot;</code>. Only{" "}
+          <code>agentName</code> survives here: the approval decision travels
+          back as the tool&apos;s result rather than as thread state, so there
+          is nothing for an <code>approval</code> field to hold.
         </p>
       </Callout>
 
@@ -219,7 +292,9 @@ export default function Page() {
           Its example is a department-authorisation flow built on a{" "}
           <code>getUserByEmail</code> the page never defines and an agent-side
           interrupt it never shows, so there is nothing here to drive it. The{" "}
-          <code>handler</code> property itself is real API.
+          <code>handler</code> property itself is real API, and the card&apos;s
+          auto-decision for <code>allow</code> and <code>deny</code> is the same
+          idea reached from the render side.
         </p>
       </Callout>
     </>

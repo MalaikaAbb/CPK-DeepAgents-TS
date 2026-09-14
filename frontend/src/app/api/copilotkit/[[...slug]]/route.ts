@@ -32,6 +32,30 @@ import {
  * `LangGraphAgent`, and this harness registers one per graph in
  * `backend/langgraph.json` with the same constructor arguments.
  */
+/**
+ * Graphs that get AG-UI's **structured** interrupt outcome rather than the
+ * legacy `on_interrupt` custom event.
+ *
+ * `@ag-ui/langgraph` still defaults to the legacy channel
+ * (`emitInterruptOutcome: false`, `enableLegacyOnInterruptEvent: true`) for
+ * clients that resume through `forwardedProps.command.resume`. Two things
+ * follow from that default, both of them visible on the Interrupt-based route:
+ *
+ *   - the interrupt value is JSON-stringified on the way out, so an object
+ *     payload reaches `useInterrupt` as a string and `event.value.content` is
+ *     `undefined`;
+ *   - `cancel()` has nothing to address and only dismisses locally, which the
+ *     Governed Actions page's `deny` path needs.
+ *
+ * Opting in turns both around: `interrupt` / `interrupts` carry real
+ * `Interrupt` objects (the original value under
+ * `metadata.langgraph.raw`), and `resolve`/`cancel` resume through
+ * `RunAgentInput.resume[]`, which `@copilotkit/react-core` 1.71 speaks. Set
+ * per graph rather than globally so the single-interrupt agent keeps the wire
+ * shape the doc page's snippet is written against.
+ */
+const STANDARD_INTERRUPT_GRAPHS = new Set<GraphId>(["interrupt_multi_agent"]);
+
 //
 // Typed as `Record<GraphId, ...>` rather than left to inference:
 // `Object.fromEntries` widens to `{ [k: string]: ... }`, and the runtime's
@@ -45,6 +69,9 @@ const agents = Object.fromEntries(
       deploymentUrl: LANGGRAPH_DEPLOYMENT_URL,
       graphId,
       langsmithApiKey: LANGSMITH_API_KEY,
+      ...(STANDARD_INTERRUPT_GRAPHS.has(graphId)
+        ? { emitInterruptOutcome: true }
+        : {}),
     }),
   ]),
 ) as Record<GraphId, LangGraphAgent>;

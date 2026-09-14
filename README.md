@@ -212,11 +212,10 @@ Where a `threadId` comes from, and how switching differs from starting fresh. `s
 *Fail:* rows that appear then vanish — the emitted state was never returned by the node.
 
 **`/generative-ui/your-components/interrupt-based`** → `interrupt_agent`, `interrupt_multi_agent`
-LangGraph `interrupt()` in a `createMiddleware` `beforeModel` hook, answered by `useInterrupt`. Two tabs: one interrupt, and two dispatched by `type` via `enabled`. Both are the page's code **as printed**.
-*Try:* send `Hello`.
-*Pass:* on **One interrupt**, the first message is answered with a name form rather than a reply; submit a name and the run resumes using it. On **Two, dispatched by type**, one of the two registrations claims the event and draws its card — the approval pair or the question box.
-*Was an expected failure until 04 Sep 2026:* the conditional tab drawing no card at all, the `enabled` predicates throwing on `eventValue` before either handler could claim the event. That finding has been withdrawn; the `@ts-expect-error` annotations stay, because the *type* error behind it has not moved (§9 item 6).
-*Real failure:* either tab drawing no card — check the agent server is up, then re-read §9 item 6.
+LangGraph `interrupt()` answered by `useInterrupt`. Two tabs. **One interrupt** is the page's Implementation section as printed: one `interrupt()` with a plain string in a `beforeModel` hook. **Two, dispatched by type** is its "Condition UI executions" section *corrected* — see §9 item 6 for the three things the snippet needs — with its `approval` interrupt rebuilt as a governed action on a `send_email` tool, per the [Governed Actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) page.
+*Try:* send `Hello`, then, on the second tab, `Email dana@acme.internal subject "Standup" body "Moved to 10am."`, then `Email pat@partner.example subject "Invoice" body "Please pay."`, then `Email sam@competitor.example subject "Lunch?" body "Free Thursday?"`.
+*Pass:* on **One interrupt**, the first message is answered with a name form rather than a reply; submit a name and the run resumes using it. On **Two, dispatched by type**, the opening turn draws the blue name box (`type: "ask"`), and each email then takes a different branch of the same approval card, chosen by the policy the agent ran *before* it interrupted — `@acme.internal` is a green **allow** card that approves itself and sends, `@partner.example` is an amber **require_approval** card with Approve and Reject, and `@competitor.example` is a red **deny** card that cancels the run and makes the agent report a policy block. `send_email · Done` appears in the transcript on each path, carrying either the send or the refusal.
+*Fail:* an approval card with a blank summary means the graph fell back to the legacy `on_interrupt` wire, where the interrupt value arrives JSON-stringified — check `STANDARD_INTERRUPT_GRAPHS` in `frontend/src/app/api/copilotkit/[[...slug]]/route.ts` still lists `interrupt_multi_agent`. No card at all on either tab means the agent server is down.
 
 ### App Control
 
@@ -228,7 +227,7 @@ A tool whose body runs in the browser. The backend defines no tool at all.
 
 **`/webmcp`** — 🚧 **Tracked, not implemented.** The doc adds a `webmcp` flag to a frontend tool so browser agents can discover it through `document.modelContext`. Its own test procedure needs Chrome 149+ with the WebMCP origin trial (or `chrome://flags/#enable-webmcp-testing`) and Chrome's Model Context Tool Inspector; CopilotKit no-ops where `document.modelContext` is absent, so a demo here would register nothing and still look green.
 
-**`/human-in-the-loop/governed-actions`** — 🚧 **Tracked, not implemented.** An approval card gating a side-effecting action, via `useInterrupt` or `useHumanInTheLoop`. The page is served byte-identically under all five framework prefixes and its snippets are plain React with no graph involved, so it is implemented once — in Agno-react and Mastra-react — rather than five times.
+**`/human-in-the-loop/governed-actions`** — ⚠️ **Half implemented.** An approval card gating a side-effecting action. Its `useInterrupt` half is live: the demo is the second tab of `/generative-ui/your-components/interrupt-based/demo-chat`, where a `wrapToolCall` hook evaluates the outbound-email policy server-side and interrupts with this page's `GovernedAction` envelope — id, summary, tool, reference, verdict, arguments — and the tool runs only on an approval naming that same id and reference. This route documents the pattern and links to it. Its `useHumanInTheLoop` half is tracked for drift only: the page is served byte-identically under all five framework prefixes and that half is built in Agno-react and Mastra-react.
 
 ### Shared State
 
@@ -273,10 +272,10 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [threads-lifecycle](https://docs.copilotkit.ai/deepagents/threads-lifecycle) | `/threads-lifecycle` | `sample_agent` | ✅ Working | Switch/start are live regardless; replay needs a server-side store |
 | [generative-ui/tool-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/tool-rendering) | `/generative-ui/tool-rendering` | `tool_rendering_agent` | ✅ Working | `useDefaultRenderTool` destructures a prop that doesn't exist |
 | [generative-ui/state-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/state-rendering) | `/generative-ui/state-rendering` | `state_rendering_agent` | ✅ Working | Emit loop's caller is not shown by the page |
-| [.../your-components/interrupt-based](https://docs.copilotkit.ai/deepagents/generative-ui/your-components/interrupt-based) | `/generative-ui/your-components/interrupt-based` | `interrupt_agent`, `interrupt_multi_agent` | ✅ Working | Both tabs left as printed; the conditional finding was withdrawn 04 Sep 2026, the TS2339 behind it stands (item 6) |
+| [.../your-components/interrupt-based](https://docs.copilotkit.ai/deepagents/generative-ui/your-components/interrupt-based) | `/generative-ui/your-components/interrupt-based` | `interrupt_agent`, `interrupt_multi_agent` | ✅ Working | Tab 1 as printed. Tab 2 corrected and rebuilt as a governed action — three defects in the printed snippet (item 6) |
 | [frontend-tools](https://docs.copilotkit.ai/deepagents/frontend-tools) | `/frontend-tools` | `frontend_tools_agent` | ✅ Working | Page's TS is a comment; state field missing `zodState` |
 | [webmcp](https://docs.copilotkit.ai/deepagents/webmcp) | `/webmcp` | — | 🚧 Not started | Tracked for drift. Needs Chrome 149+ and the WebMCP origin trial |
-| [human-in-the-loop/governed-actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) | `/human-in-the-loop/governed-actions` | — | 🚧 Not started | Tracked for drift. Same bytes under all five prefixes; built in Agno-react and Mastra-react |
+| [human-in-the-loop/governed-actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) | `/human-in-the-loop/governed-actions` | `interrupt_multi_agent` | ⚠️ Partial | `useInterrupt` half live on the interrupt-based route's second tab; `useHumanInTheLoop` half tracked for drift |
 | [shared-state/in-app-agent-read](https://docs.copilotkit.ai/deepagents/shared-state/in-app-agent-read) | `/shared-state/in-app-agent-read` | `shared_state_agent` | ⚠️ Partial | Agent switches language and says so; the panel and raw `agent.state` never follow (item 6b) |
 | [shared-state/in-app-agent-write](https://docs.copilotkit.ai/deepagents/shared-state/in-app-agent-write) | `/shared-state/in-app-agent-write` | `shared_state_agent` | ⚠️ Partial | Write round-trips; model never sees it; `exposeState` can't reach it |
 | [...?agent-type=prebuilt](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates?agent-type=prebuilt) | `/shared-state/predictive-state-updates` | `predictive_state_agent` | ⚠️ Partial | `stateStreamingMiddleware` + `stateItem`; Agent Progress stays empty for the whole run (item 6c) |
@@ -306,7 +305,7 @@ Every item was checked against the installed packages; the behavioural ones were
 **2. `exposeState` cannot see any user state field.**
 The intended remedy for "the model doesn't see my state" — `createCopilotkitMiddleware({ exposeState })` — appends a "Current agent state:" note to the system prompt, built from `request.state` inside the CopilotKit middleware's own `wrapModelCall`. **That object is scoped to the declaring middleware's `stateSchema`**, so it contains only `messages` and `copilotkit`. Your `language` field lives on *your* middleware and is invisible to it. Verified with a spy middleware: the note is never appended, with `exposeState: ["language"]` *and* with `exposeState: true`. Since every user field is declared on a user middleware, `exposeState` has nothing it can reach. The Python `CopilotKitMiddleware(expose_state=[...])` reads whole graph state and works — same feature, opposite outcome.
 The 2026-09-03 doc sync spread this further: [interrupt-based](https://docs.copilotkit.ai/deepagents/generative-ui/your-components/interrupt-based) gained a "Make your agent aware of interruptions" section built on `createCopilotkitMiddleware({ exposeState: ["agentName"] })`, with a system prompt that tells the model *Current agent state contains agentName*. `agentName` is declared on `agentNameMiddleware`, so the note is never built and the prompt describes something absent. Re-measured there with a fake model capturing the request: unchanged with the middleware first, last, and with `exposeState: true`; a probe middleware declaring `agentName` itself reads it at the same point, which pins it to schema scoping rather than ordering.
-→ `/shared-state/in-app-agent-write` is ⚠️ Partial as a result, and the interrupt route now carries the same caveat.
+→ `/shared-state/in-app-agent-write` is ⚠️ Partial as a result, and the interrupt route carries the same caveat: the run resumes with the name in thread state and the frontend renders it, but the model is never told what it is.
 
 **3. The JS dev server ignores `output` schemas.**
 `StateGraph({ state, input, output })` filters correctly when called directly:
@@ -329,9 +328,16 @@ Its docstring explains why: without it a Zod field carries no JSON-schema hook, 
 **5. Predictions need `<CopilotKit>`, not `<CopilotKitProvider>`.**
 Not stated on any page, and the worst failure mode here because it is completely silent. The backend emits a `PredictState` custom event; the *browser* applies it by watching `TOOL_CALL_ARGS` and calling `agent.setState`. Nothing appears in any `STATE_SNAPSHOT`. That subscriber lives in `CopilotListeners`, which `<CopilotKit>` mounts and `<CopilotKitProvider>` does not. With the bare provider the event arrives, nobody listens, the panel stays empty, and no error is logged.
 
-**6. `enabled` has no `eventValue`, and `event.value` is a string.**
-[interrupt-based](https://docs.copilotkit.ai/deepagents/generative-ui/your-components/interrupt-based)'s "Condition UI executions" section writes `enabled: ({ eventValue }) => …`. The parameter is typed `InterruptEvent<TValue>` — `{ name, value }` — so this is a hard `TS2339` compile error in TypeScript (the Python repo only finds it at runtime). Separately, a LangGraph `interrupt()` reaches the browser as the legacy `on_interrupt` custom event with its value **serialised**, so `event.value.type` is `undefined` on a string. **Both are left in the demo unedited**, with a `@ts-expect-error` on each `enabled` line so the repo still builds — and those annotations are the evidence rather than a patch, since an unused one is itself an error (`TS2578`). The page's *first* section is fine.
-The **runtime** half of this was withdrawn on 04 Sep 2026 on a report that the conditional tab now draws its card, and the recorder entry no longer carries a `knownIssue` — so that take reports `[PASS]` and types no Notepad note. The **compile** half stands unchanged and is checkable without running anything: `tsc` still passes only because both `@ts-expect-error` lines are still being consumed. Delete one and TS2339 comes back.
+**6. The "Condition UI executions" snippet needs three corrections, not one.**
+[interrupt-based](https://docs.copilotkit.ai/deepagents/generative-ui/your-components/interrupt-based)'s second section fails on each of these independently. The demo now carries the corrected form rather than the printed one, and the page's approval interrupt is rebuilt as a governed action (see below).
+
+- **`enabled` has no `eventValue`.** The page writes `enabled: ({ eventValue }) => eventValue.type === 'ask'`. The parameter is typed `InterruptEvent<TValue>` — `{ name, value }` — so this is a hard `TS2339` in TypeScript (the Python repo only finds it at runtime). At runtime the destructure yields `undefined`, reading `.type` throws, `useInterrupt` catches it and treats the interrupt as unclaimed, and **no card is drawn at all**.
+- **`event.value` is a string on the default wire.** `@ag-ui/langgraph` still defaults to the legacy `on_interrupt` custom event (`emitInterruptOutcome: false`) and JSON-stringifies a non-string interrupt value on the way out, so `event.value.content` is `undefined` and the card renders blank. `TValue` defaults to `any`, so the compiler does not catch this one. Opting the graph into `emitInterruptOutcome: true` is what fixes it — and it is also what gives `cancel()` something to address; on the legacy wire it only dismisses the card locally, with a console warning, and the Governed Actions page's `deny` path is built on it.
+- **Two `useInterrupt` hooks overwrite each other.** `renderInChat` defaults to true and publishes through one shared field on the CopilotKit instance (`setInterruptElement`) — last writer wins. With two hooks mounted, the second one's effect runs after the first's and overwrites it with `null` whenever its own predicate does not match, so the *first* hook's card is never shown. The page prints two hooks side by side and says nothing about this. `renderInChat: false` on both, placing the returned elements yourself, is the fix.
+
+The page's *first* section is unaffected — it passes `interrupt()` a plain string, so `event.value` is that string — and that graph is deliberately left on the legacy wire so tab 1 stays true to the snippet.
+
+**6a. The page's approval interrupt cannot work as printed.** Its `approval` interrupt is raised from `beforeModel` with a hardcoded `"please approve"` and no state guard, so *every* model call in the run stops for another approval — including the one that follows the approval — and the thing being approved is never named. This repo moves it to a `wrapToolCall` hook on a `send_email` tool and gives it the [Governed Actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) envelope, which is also what makes that page's guardrails testable: the verdict is computed server-side before the card is shown, the action id is the tool call id (stable across the replay that resuming an interrupt performs), and the agent re-checks the id and the policy reference before the tool runs. Separately, that page's `GovernedActionCard` auto-decides `allow`/`deny` from a `useEffect` with no fired-once guard, so under React 19 StrictMode an `allow` resumes the run twice from one card.
 
 **6b. Agent state written by the agent never reaches `useAgent`.**
 [in-app-agent-read](https://docs.copilotkit.ai/deepagents/shared-state/in-app-agent-read)'s whole claim is that the app can read what the agent is doing. Ask the demo to set the language to Spanish and the agent does — it answers `El idioma se ha establecido en español.` — while the panel beside it still reads `Language: english` and the raw `agent.state` under it still carries `"language": "english"`. The state delta is not reaching the frontend subscription, so no UI can reflect what the agent is currently doing. Reproduced 04 Sep 2026; the Python sibling files this identically.
@@ -369,10 +375,10 @@ Worth recording, since it is the reason this repo covers more than its sibling:
 - **`createMiddleware` carries schema and hook together** on the interrupt-based page, where Python needs a separate `AgentState`, an `AgentMiddleware` subclass and an explicit `state_schema` to tie them. The 2026-09-03 doc sync made the Python tab print all three (it used to print two of them), so both tabs are now complete — TypeScript just says it in fewer moving parts.
 - **`zodState(z.enum([...]).default("english"))` really applies at runtime.** The Python `Literal[...] = "english"` on a `TypedDict` is a class attribute LangGraph never applies, so the Python repo has to seed the key by hand.
 
-Two of the page's TypeScript snippets do not typecheck, and both are left as printed with a `@ts-expect-error` above them rather than edited — the annotation is the evidence, since an unused one is itself an error (`TS2578`):
+Two of the page's TypeScript snippets do not typecheck. One is left as printed with a `@ts-expect-error` above it rather than edited — the annotation is the evidence, since an unused one is itself an error (`TS2578`):
 
-- `Annotation<string[]>({ default: () => [] })` in the manual-emission variant. `TS2345`: the config requires a `value` reducer alongside `default`. **Runtime is unaffected** — LangGraph falls back to last-write-wins, and the four steps stream correctly. Type-only defect.
-- `enabled: ({ eventValue }) => …` on the interrupt-based page (item 6 above). That one *does* break at runtime.
+- `Annotation<string[]>({ default: () => [] })` in the manual-emission variant. `TS2345`: the config requires a `value` reducer alongside `default`. **Runtime is unaffected** — LangGraph falls back to last-write-wins, and the four steps stream correctly. Type-only defect, so the snippet stays as printed.
+- `enabled: ({ eventValue }) => …` on the interrupt-based page (item 6 above). That one *also* breaks at runtime — it silently stops any card from rendering — so it is corrected in the demo rather than annotated. The finding is recorded in item 6 instead of in the code.
 
 One genuine edit: `shouldContinue as any` in the tool-emission variant is replaced with a typed destination list on `addConditionalEdges`, which is the same thing expressed without the cast.
 
@@ -392,6 +398,7 @@ The Deep Agents doc tree has **no** Troubleshooting section as of 2026-08-06. Wh
 | Wrong language's agent answers | Both repos on one port. | This repo is 8124, the Python sibling 8123. Don't cross them. |
 | Predictive State Updates panel never fills | Root provider is `<CopilotKitProvider>`. | Use `<CopilotKit>` — §9 item 5. Fails silently. |
 | A custom state field never reaches `useAgent().state` | Missing `zodState` wrapper. | Wrap it — §9 item 4. |
+| Interrupt card buttons do nothing, and the take fails 30s later waiting for a reply | The card was rendered at the bottom edge of the viewport, under the recorder's fixed `bottom: 0` taskbar overlay. Both the synthetic click and the element click were swallowed. | Render interrupt UI **above** the chat, not below it. `answerInterrupt` now waits for the form to detach before reporting success, so a swallowed click fails at the click rather than 30s downstream. |
 | Shared-state toggle flips but the agent ignores it | Known limitation. | Not fixable from userland — §9 item 2. |
 | Input/Output Schemas shows `question`/`resources` present | Known limitation. | The graph is right; the JS server leaks — §9 item 3. |
 | `Expected ... ToolMessage` / unanswered tool call | A tool returned a `Command` without one. | Include a `ToolMessage` with the injected `tool_call_id` — see `stateRendering.ts`. |
@@ -453,8 +460,9 @@ tabs, and the three predictive-state variants. Five tracked doc pages have no
 take at all: `state-inputs-outputs` and `workflow-execution` are reference-only
 routes with no `/demo-chat` surface, and `webmcp`, `governed-actions` and
 `intelligence/quickstart` are tracked for drift with no implementation behind
-them. The first two are a known gap, listed in `PROJECT_GOAL.md`; the other
-three are deliberate — see §8.
+them — `governed-actions` because its `useInterrupt` half is filmed on the
+conditional interrupt take instead. The first two are a known gap, listed in
+`PROJECT_GOAL.md`; the other three are deliberate — see §8.
 
 **`[ISSUE]` is not `[FAIL]`.** A page with a `knownIssue` in
 `autorecorder/config/pages.config.ts` is *expected* to misbehave: the take
@@ -462,7 +470,9 @@ records the misbehaviour, types the finding into an on-screen Notepad, reports
 `[ISSUE]` and exits 0. Three pages are on that list here — Reading agent state,
 Writing agent state, and the prebuilt tab of Predictive State Updates, all in
 [§9](#9-known-issues--docvsimplementation-discrepancies). The conditional
-interrupt tab was the fourth until 04 Sep 2026.
+interrupt tab was the fourth until 04 Sep 2026; it now drives the full governed
+gate — name box, approval, policy denial — and fails loudly if any of the three
+goes missing.
 A route that 404s or a demo that renders no chat is still a `[FAIL]`: those are
 breaks in this repo rather than in the thing under test.
 
@@ -514,7 +524,7 @@ deepagents-ts/
 │       ├── shared.ts                 MODEL / OPENAI_MODEL, read by every agent
 │       ├── toolRendering.ts          tool_rendering_agent
 │       ├── stateRendering.ts         state_rendering_agent
-│       ├── interruptBased.ts         interrupt_agent + interrupt_multi_agent
+│       ├── interruptBased.ts         interrupt_agent + interrupt_multi_agent (governed send_email)
 │       ├── frontendTools.ts          frontend_tools_agent
 │       ├── sharedState.ts            shared_state_agent (read + write routes)
 │       ├── predictiveState.ts        predictive_state_agent      (prebuilt)
@@ -559,7 +569,7 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 **App Control**
 - [Frontend Tools](https://docs.copilotkit.ai/deepagents/frontend-tools)
 - [WebMCP](https://docs.copilotkit.ai/deepagents/webmcp) — tracked for drift only
-- [Governed Actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) — tracked for drift only
+- [Governed Actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) — `useInterrupt` half implemented on the interrupt-based route; `useHumanInTheLoop` half tracked for drift only
 
 **Intelligence**
 - [Quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) — tracked for drift only

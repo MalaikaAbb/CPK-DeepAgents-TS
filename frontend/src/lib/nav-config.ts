@@ -153,10 +153,10 @@ export const NAV: NavGroup[] = [
         title: "Interrupt-based HITL",
         docPath: "/deepagents/generative-ui/your-components/interrupt-based",
         summary:
-          "LangGraph interrupt() inside a createMiddleware beforeModel hook, answered in the browser by useInterrupt.",
+          "LangGraph interrupt() inside a createMiddleware beforeModel hook, answered in the browser by useInterrupt — plus a governed-action approval on a tool call.",
         status: "working",
         statusNote:
-          "Both tabs are the page's code verbatim. The conditional tab was ⚠️ Partial until 04 Sep 2026 on an `enabled` callback destructuring an `eventValue` the event does not carry; that finding has been withdrawn.",
+          "Tab 1 is the page's code verbatim. Tab 2 is not: the printed snippet needs three corrections to work (`enabled` takes the whole event, not an `eventValue`; the interrupt value is a JSON string on the adapter's default wire; two `useInterrupt` hooks overwrite each other's in-chat element), and its unconditional `beforeModel` approval is replaced by a `wrapToolCall` governed action per the Governed Actions page.",
       },
     ],
   },
@@ -189,9 +189,9 @@ export const NAV: NavGroup[] = [
         docPath: "/deepagents/human-in-the-loop/governed-actions",
         summary:
           "Gating a side-effecting agent action behind an approval card, via useInterrupt or useHumanInTheLoop.",
-        status: "not-started",
+        status: "partial",
         statusNote:
-          "Tracked for drift only — no demo in this repo yet. The identical page is implemented in Agno-react and Mastra-react; all five framework prefixes serve byte-identical content, so those findings apply here unchanged.",
+          "The useInterrupt half is live — the demo is the Interrupt-based route's second tab, which raises this page's envelope from a wrapToolCall hook. The useHumanInTheLoop half is tracked for drift only; the identical page is served under all five framework prefixes and that half is implemented in Agno-react and Mastra-react.",
       },
     ],
   },

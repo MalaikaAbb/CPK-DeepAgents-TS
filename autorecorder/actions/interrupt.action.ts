@@ -5,19 +5,18 @@ import { humanClick, humanGlide, sleep } from '../core/overlays/cursor';
 import { type ActionContext, type PageActionHandler, type PageRecordConfig } from '../core/types';
 
 /**
- * Interrupt-based HITL — one doc page, two tabs, two different outcomes.
+ * Interrupt-based HITL — one doc page, two tabs, two takes.
  *
  * The first tab is the page's Implementation section verbatim: one
  * `useInterrupt`, no `enabled`. It works, and the take films it working.
  *
- * The second is the page's "Condition UI executions" section, also verbatim.
- * It carried a `knownIssue` until 04 Sep 2026 — `enabled` destructures an
- * `eventValue` that no longer exists on the event, so neither registration
- * claimed the interrupt and no card was drawn — and that entry has been removed
- * on a report that the tab now behaves. The take below therefore no longer
- * writes a Notepad note; what it does instead is say plainly in the run log
- * whether a card rendered, so a return of the old behaviour is not filed as a
- * green clip.
+ * The second is the page's "Condition UI executions" section, corrected, with
+ * its `approval` interrupt rebuilt as a governed action on the `send_email`
+ * tool — https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions.
+ * Neither take carries a `knownIssue` any more, so neither writes a Notepad
+ * report at the end; both fail loudly instead, because everything they drive is
+ * supposed to work and a missing card is a regression rather than a documented
+ * defect.
  *
  * They stay two takes rather than one because one clip per doc section is what
  * lets a reader open the footage for the section they are reading.
@@ -104,6 +103,35 @@ async function answerInterrupt(ctx: ActionContext, page: Page, answer: string): 
     await field.press('Enter');
   }
 
+  // A click is not an answer. Both of the ones above can be swallowed without
+  // raising anything -- `humanClick` dispatches at a coordinate and reports
+  // nothing, and the element click is behind a `.catch`. The card is drawn by
+  // `useInterrupt`, which tears it down when the resume run starts, so the form
+  // detaching is the only proof `resolve()` actually fired. Without this check
+  // the take logged a green "answered" line and then failed 30s later waiting
+  // for a reply to a run that was never resumed.
+  const submitted = await field
+    .waitFor({ state: 'detached', timeout: 10000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!submitted) {
+    // One retry from the keyboard, which cannot be covered by an overlay the
+    // way a button at the bottom edge of the viewport can -- the recorder's own
+    // taskbar sits at `bottom: 0` and is how this was first found.
+    ctx.warn(`The submit click did not take; retrying from the keyboard.`);
+    await field.press('Enter').catch(() => {});
+    const retried = await field
+      .waitFor({ state: 'detached', timeout: 10000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (!retried) {
+      ctx.warn(`The interrupt form is still on screen -- resolve() never fired.`);
+      return false;
+    }
+  }
+
   console.log(`   ✓ Answered the interrupt with "${answer}".`);
   return true;
 }
@@ -154,18 +182,22 @@ export const runInterruptSingleAction: PageActionHandler = async (
 };
 
 /**
- * Two registrations dispatched by `enabled`.
+ * Two registrations dispatched by `enabled`, and the governed action one of
+ * them approves.
  *
- * Switch tab, ask, and answer whichever card the dispatch draws -- the approval
- * pair or the question box, both of which the page renders from the same hook.
- * The take is driven the same way the single-interrupt one is, because that is
- * what a reader following the section would do.
+ * Three turns, because the tab has three things worth filming and they are
+ * sequential:
  *
- * `AgentSilentError` is caught rather than allowed to propagate. This entry no
- * longer carries `knownIssue.expectsNoResponse`, so an escaping exception would
- * fail the take and lose the clip; catching it keeps the footage and puts the
- * fact in the log, where a run that goes quiet again is legible as a return of
- * the removed finding rather than as a recorder fault.
+ *   1. an opening turn        -- `beforeModel` raises the `ask` interrupt and
+ *                                the blue name box is drawn
+ *   2. an external recipient  -- policy says `require_approval`, the amber card
+ *                                appears, and clicking Approve sends it
+ *   3. a blocked recipient    -- policy says `deny`, the red card auto-cancels
+ *                                itself, and the agent reports the block
+ *
+ * Turn 3 needs no click: the card decides it, which is the point of showing it.
+ * Each step fails loudly instead of being excused, because all three work --
+ * a missing card here is a regression, not a documented defect.
  */
 export const runInterruptConditionalAction: PageActionHandler = async (
   page: Page,
@@ -175,42 +207,71 @@ export const runInterruptConditionalAction: PageActionHandler = async (
 ) => {
   await selectTab(ctx, page, 'conditional');
 
-  console.log(`   [Interrupt conditional] Prompting to raise the dispatched interrupt...`);
-  const msgCount = await sendPrompt(page, config.prompt, { timeoutMs: 12000 });
+  const [opening, approvedSend, blockedSend] = promptsFor(config);
 
-  // Whichever registration claims the event: the approval pair renders a button,
-  // the question box renders the same `response` field the single tab uses.
-  const card = page
-    .locator('button:has-text("Approve"), input[name="response"]')
-    .first();
-  const rendered = await card
-    .waitFor({ state: 'visible', timeout: 30000 })
+  console.log(`   [Interrupt conditional] Opening turn to raise the "ask" interrupt...`);
+  await sendPrompt(page, opening, { timeoutMs: 12000 });
+
+  if (!(await answerInterrupt(ctx, page, AGENT_NAME))) {
+    throw new Error(
+      'The "ask" interrupt never rendered on the conditional tab. Either the ' +
+        '`enabled` dispatch stopped claiming the event or the agent server is down.',
+    );
+  }
+  await waitForAgentResponseCompletion(page, 2500);
+
+  // Turn 2 -- require_approval, answered by hand.
+  console.log(`   [Interrupt conditional] Proposing an external send (require_approval)...`);
+  let msgCount = await sendPrompt(page, approvedSend, { timeoutMs: 12000 });
+
+  const approve = page.locator('button:has-text("Approve and run")').first();
+  const cardShown = await approve
+    .waitFor({ state: 'visible', timeout: 45000 })
     .then(() => true)
     .catch(() => false);
 
-  if (rendered) {
-    const isApproval = await page
-      .locator('button:has-text("Approve")')
-      .first()
-      .isVisible()
-      .catch(() => false);
+  if (!cardShown) {
+    throw new Error(
+      'The governed-action card never rendered. The approval interrupt is raised from ' +
+        '`wrapToolCall` in backend/src/interruptBased.ts -- check the agent called ' +
+        '`send_email` at all before blaming the frontend.',
+    );
+  }
 
-    if (isApproval) {
-      const box = await page.locator('button:has-text("Approve")').first().boundingBox();
-      if (box) {
-        await humanGlide(page, box.x + box.width / 2, box.y + box.height / 2, 20);
-        await sleep(400);
-        await humanClick(page);
-      }
-      await page.locator('button:has-text("Approve")').first().click({ timeout: 4000 }).catch(() => {});
-      console.log(`   ✓ Approved the interrupt.`);
-    } else {
-      await answerInterrupt(ctx, page, AGENT_NAME);
-    }
+  const box = await approve.boundingBox();
+  if (box) {
+    await humanGlide(page, box.x + box.width / 2, box.y + box.height / 2, 20);
+    await sleep(500);
+    await humanClick(page);
+  }
+  await approve.click({ timeout: 4000 }).catch(() => {});
+  console.log(`   ✓ Approved the governed action.`);
+
+  try {
+    await waitForAgentResponseCompletion(page, 3000, msgCount);
+  } catch (e) {
+    if (!(e instanceof AgentSilentError)) throw e;
+    ctx.warn(`[Interrupt conditional] No reply after approval; the clip ends on the tool card.`);
+  }
+
+  // Turn 3 -- deny, decided by the card without a click.
+  console.log(`   [Interrupt conditional] Proposing a blocked send (deny)...`);
+  msgCount = await sendPrompt(page, blockedSend, { timeoutMs: 12000 });
+
+  const denied = page.locator('text=Blocked by policy').first();
+  const deniedShown = await denied
+    .waitFor({ state: 'visible', timeout: 45000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (deniedShown) {
+    console.log(`   ✓ Policy denial card drawn; it cancels the run on its own.`);
   } else {
-    ctx.warn(`[Interrupt conditional] No card rendered in 30s. This is the behaviour the ` +
-        `removed \`knownIssue\` described -- neither registration claiming the event -- so ` +
-        `check the tab by hand before trusting this clip as a pass.`,
+    // The card cancels itself the moment it mounts, so on a slow machine the
+    // frame can be gone before the locator settles. The agent's reply is the
+    // second witness, and the take is only failed if that is missing too.
+    ctx.warn(`[Interrupt conditional] Did not catch the denial card on screen; ` +
+        `checking the agent's reply instead.`,
     );
   }
 
@@ -218,7 +279,10 @@ export const runInterruptConditionalAction: PageActionHandler = async (
     await waitForAgentResponseCompletion(page, config.waitAfterPromptMs ?? 5000, msgCount);
   } catch (e) {
     if (!(e instanceof AgentSilentError)) throw e;
-    ctx.warn(`[Interrupt conditional] The agent never answered. The clip shows an empty chat.`,
+    throw new Error(
+      'The blocked send produced neither a denial card nor a reply. The `cancel()` ' +
+        'path needs the structured interrupt wire -- check `STANDARD_INTERRUPT_GRAPHS` ' +
+        'in the runtime route still lists interrupt_multi_agent.',
     );
   }
 

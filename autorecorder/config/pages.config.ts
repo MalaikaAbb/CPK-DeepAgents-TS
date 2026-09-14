@@ -158,9 +158,9 @@ export const PAGES = definePages([
     route: 'generative-ui/your-components/interrupt-based',
     ideFile:
       'frontend/src/app/generative-ui/your-components/interrupt-based/demo-chat/page.tsx',
-    startLine: 11,
-    endLine: 43,
-    extraTabs: [{ filePath: 'backend/src/interruptBased.ts', startLine: 45, endLine: 70 }],
+    startLine: 35,
+    endLine: 53,
+    extraTabs: [{ filePath: 'backend/src/interruptBased.ts', startLine: 60, endLine: 85 }],
     prompts: ['Hi there. Could you help me with something?', 'What should I call you?'],
     prompt: 'Hi there. Could you help me with something?',
     waitAfterPromptMs: 4000,
@@ -170,18 +170,15 @@ export const PAGES = definePages([
     // per section is what lets a reader of the report open the footage for the
     // section they are reading rather than scrubbing for it.
     //
-    // No `knownIssue`, as of 04 Sep 2026. The entry that was here filed the
-    // `enabled({ eventValue })` destructure -- neither registration claimed the
-    // event, so no card was drawn and the run stopped at the interrupt with
-    // nothing to answer it. It was removed on a report that the tab now behaves.
-    //
-    // Removing it is what stops the Notepad report being typed at the end of the
-    // take: the action writes that note only when this field is present. It also
-    // drops `expectsNoResponse`, so silence here is no longer excused -- see the
-    // handler in `actions/interrupt.action.ts`, which now says so in the log.
+    // No `knownIssue`. The tab no longer prints the page's snippet: the three
+    // corrections it needs are in place, and its `approval` interrupt is a
+    // governed action on the `send_email` tool rather than the page's
+    // unconditional `beforeModel` one. The take drives the whole gate -- the
+    // name box, then one approval and one policy denial -- so a regression in
+    // any of the three shows as a missing card rather than as a quiet clip.
     //
     // `git log -S 'eventValue' -- autorecorder/config/pages.config.ts` brings
-    // the full text back if it turns out to be intermittent.
+    // the withdrawn `enabled({ eventValue })` entry back if it is ever needed.
     id: 'interrupt-conditional',
     name: 'Generative UI - Your Components - Interrupt-based HITL (conditional)',
     videoName: 'ConditionalInterrupts',
@@ -189,9 +186,14 @@ export const PAGES = definePages([
     route: 'generative-ui/your-components/interrupt-based',
     ideFile:
       'frontend/src/app/generative-ui/your-components/interrupt-based/demo-chat/page.tsx',
-    startLine: 134,
-    endLine: 157,
-    extraTabs: [{ filePath: 'backend/src/interruptBased.ts', startLine: 45, endLine: 66 }],
+    startLine: 272,
+    endLine: 314,
+    extraTabs: [{ filePath: 'backend/src/interruptBased.ts', startLine: 233, endLine: 279 }],
+    prompts: [
+      'Hi there. Could you help me with something?',
+      'Email pat@partner.example with the subject "Invoice" and the body "Please pay by Friday."',
+      'Now email sam@competitor.example with the subject "Lunch?" and the body "Free Thursday?"',
+    ],
     prompt: 'Hi there. Could you help me with something?',
     waitAfterPromptMs: 5000,
   },
