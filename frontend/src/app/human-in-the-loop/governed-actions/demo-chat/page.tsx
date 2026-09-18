@@ -1,18 +1,32 @@
 "use client";
 
-import { CopilotChat, useHumanInTheLoop } from "@copilotkit/react-core/v2";
+import {
+  CopilotChat,
+  useHumanInTheLoop,
+  useInterrupt,
+} from "@copilotkit/react-core/v2";
 import { useEffect } from "react";
 import { z } from "zod";
 
 import { DemoFrame } from "@/components/demo-frame";
 
 /**
- * Governed Action Approval UI — the page's tool-call variant.
+ * Governed Action Approval UI — both of the page's variants, mounted together.
  *
- * The guide publishes two patterns. This is `useHumanInTheLoop`, the one that
- * works against any agent. The `useInterrupt` variant needs a backend that can
- * pause a run and attach `interrupt.metadata.action`, which no agent in this
- * repo does — see the route page.
+ * `useHumanInTheLoop` (the tool-call variant) is the one that fires here: the
+ * model calls `approve_governed_action` and the card renders.
+ *
+ * `useInterrupt` (the page's lead variant) is mounted verbatim but cannot fire.
+ * The page publishes only the consuming half — no backend that pauses a run
+ * and attaches `interrupt.metadata.action` — and no agent in this repo does.
+ * Two further gaps sit behind that one, both left as published:
+ *   - The snippet passes no `agentId` and this repo's provider names none, so
+ *     the hook resolves to the `"default"` agent, which does not exist here.
+ *   - Even with a pausing backend, the installed LangGraph adapter
+ *     (`@ag-ui/langgraph` 0.0.43) puts `interrupt(value)`'s payload under
+ *     `interrupt.metadata.langgraph.raw`, never `interrupt.metadata.action`,
+ *     so the snippet's guard would return `null` and draw nothing.
+ * See the route page.
  *
  * The page is byte-identical under all five framework prefixes, so this is the
  * same implementation Agno-react and Mastra-react carry, with the one
@@ -102,6 +116,43 @@ function GovernedActionCard({
   );
 }
 
+// [4] governed actions: inline approval with useInterrupt
+// [!code highlight]
+function GovernedActionApproval() {
+  useInterrupt({
+    render: ({ interrupt, resolve, cancel }) => {
+      const action = interrupt?.metadata?.action as GovernedAction | undefined;
+
+      if (!action) {
+        return null;
+      }
+
+      return (
+        <GovernedActionCard
+          action={action}
+          onApprove={() =>
+            resolve({
+              approved: true,
+              actionId: action.id,
+              reference: action.reference,
+            })
+          }
+          onReject={() =>
+            resolve({
+              approved: false,
+              actionId: action.id,
+              reference: action.reference,
+            })
+          }
+          onBlock={() => cancel()}
+        />
+      );
+    },
+  });
+
+  return null;
+}
+
 export default function Page() {
   // The generic is supplied explicitly: this hook does not infer its arg type
   // from `parameters`, it defaults to `Record<string, unknown>`, which makes
@@ -152,6 +203,8 @@ export default function Page() {
       parentPath="/human-in-the-loop/governed-actions"
       subtitle="approve_governed_action — the run waits on your verdict"
     >
+      {/* The page does not say where to mount this; it renders nothing itself. */}
+      <GovernedActionApproval />
       <CopilotChat
         agentId="sample_agent"
         labels={{

@@ -276,7 +276,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [.../your-components/interrupt-based](https://docs.copilotkit.ai/deepagents/generative-ui/your-components/interrupt-based) | `/generative-ui/your-components/interrupt-based` | `interrupt_agent`, `interrupt_multi_agent` | ✅ Working | Both tabs left as printed; the conditional finding was withdrawn 04 Sep 2026, the TS2339 behind it stands (item 6) |
 | [frontend-tools](https://docs.copilotkit.ai/deepagents/frontend-tools) | `/frontend-tools` | `frontend_tools_agent` | ✅ Working | Page's TS is a comment; state field missing `zodState` |
 | [webmcp](https://docs.copilotkit.ai/deepagents/webmcp) | `/webmcp` | — | 🚧 Not started | Tracked for drift. Needs Chrome 149+ and the WebMCP origin trial |
-| [human-in-the-loop/governed-actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) | `/human-in-the-loop/governed-actions` | `sample_agent` | ✅ Working | Tool-call variant. `useInterrupt` half needs a backend that pauses a run; published schema compiles unchanged on zod 3 |
+| [human-in-the-loop/governed-actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) | `/human-in-the-loop/governed-actions` | `sample_agent` | ⚠️ Partial | Tool-call variant works. `useInterrupt` variant mounted verbatim but never fires: no backend is published, it fails `tsc` (TS2322, `render` returns `null`), binds to `"default"`, and the LangGraph adapter puts the payload under `metadata.langgraph.raw`, not `metadata.action` |
 | [shared-state/in-app-agent-read](https://docs.copilotkit.ai/deepagents/shared-state/in-app-agent-read) | `/shared-state/in-app-agent-read` | `shared_state_agent` | ⚠️ Partial | Agent switches language and says so; the panel and raw `agent.state` never follow (item 6b) |
 | [shared-state/in-app-agent-write](https://docs.copilotkit.ai/deepagents/shared-state/in-app-agent-write) | `/shared-state/in-app-agent-write` | `shared_state_agent` | ⚠️ Partial | Write round-trips; model never sees it; `exposeState` can't reach it |
 | [...?agent-type=prebuilt](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates?agent-type=prebuilt) | `/shared-state/predictive-state-updates` | `predictive_state_agent` | ⚠️ Partial | `stateStreamingMiddleware` + `stateItem`; Agent Progress stays empty for the whole run (item 6c) |
@@ -558,7 +558,7 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 **App Control**
 - [Frontend Tools](https://docs.copilotkit.ai/deepagents/frontend-tools)
 - [WebMCP](https://docs.copilotkit.ai/deepagents/webmcp) — tracked for drift only
-- [Governed Actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) — tool-call variant implemented; the `useInterrupt` variant is not
+- [Governed Actions](https://docs.copilotkit.ai/deepagents/human-in-the-loop/governed-actions) — both variants on the demo page; only the tool-call one can fire
 
 **Intelligence**
 - [Quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) — tracked for drift only
