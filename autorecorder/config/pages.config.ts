@@ -401,14 +401,21 @@ export const PAGES = definePages([
     route: 'human-in-the-loop/governed-actions',
     // The tool registration -- the half that makes the run stop.
     ideFile: 'frontend/src/app/human-in-the-loop/governed-actions/demo-chat/page.tsx',
-    startLine: 109,
-    endLine: 148,
+    startLine: 160,
+    endLine: 199,
     extraTabs: [
       // The approval card the tool renders.
       {
         filePath: 'frontend/src/app/human-in-the-loop/governed-actions/demo-chat/page.tsx',
-        startLine: 42,
-        endLine: 103,
+        startLine: 56,
+        endLine: 117,
+      },
+      // The useInterrupt variant, mounted verbatim. Nothing on this page's
+      // backend pauses a run, so it never draws; the tab shows what was built.
+      {
+        filePath: 'frontend/src/app/human-in-the-loop/governed-actions/demo-chat/page.tsx',
+        startLine: 119,
+        endLine: 154,
       },
     ],
     prompt:

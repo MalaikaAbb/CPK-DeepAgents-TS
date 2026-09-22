@@ -2,10 +2,11 @@
 
 > Get started with Deep Agents and CopilotKit in minutes.
 
-<IntelligenceOnboardingPrompt
-  feature="learning"
-  surface="docs_deepagents_quickstart"
-/>
+## Start with your coding agent
+
+Use this prompt to connect your Deep Agents agent to CopilotKit and verify a working conversation. Your coding agent will follow this guide in your project, or you can work through the manual steps below.
+
+Ask your coding agent to follow the setup steps on this page for your selected framework and frontend.
 
 ## Prerequisites
 
@@ -308,11 +309,11 @@ Before you begin, you'll need the following:
                   CopilotRuntime,
                   createCopilotRuntimeHandler,
                 } from "@copilotkit/runtime/v2";
-                import { LangGraphHttpAgent } from "@copilotkit/runtime/langgraph";
+                import { HttpAgent } from "@ag-ui/client";
 
                 const runtime = new CopilotRuntime({
                     agents: {
-                        sample_agent: new LangGraphHttpAgent({
+                        sample_agent: new HttpAgent({
                             url: process.env.LANGGRAPH_DEPLOYMENT_URL || "http://localhost:8123",
                         }),
                     },
@@ -358,8 +359,25 @@ Before you begin, you'll need the following:
 
         Wrap your application with the CopilotKit provider:
 
-        ```tsx title="app/layout.tsx"
+        ```tsx title="app/providers.tsx"
+        "use client";
+
         import { CopilotKit } from "@copilotkit/react-core/v2";
+
+        export function Providers({ children }: { children: React.ReactNode }) {
+          return (
+            <CopilotKit runtimeUrl="/api/copilotkit" agent="sample_agent" useSingleEndpoint={false}>
+              {children}
+            </CopilotKit>
+          );
+        }
+        ```
+
+        `app/layout.tsx` is a server component and cannot import the provider
+        directly, so it renders your client file instead:
+
+        ```tsx title="app/layout.tsx"
+        import { Providers } from "./providers";
         import "@copilotkit/react-core/v2/styles.css";
 
         // ...
@@ -368,9 +386,9 @@ Before you begin, you'll need the following:
             return (
                 <html lang="en">
                     <body>
-                        <CopilotKit runtimeUrl="/api/copilotkit" agent="sample_agent" useSingleEndpoint={false}>
+                        <Providers>
                             {children}
-                        </CopilotKit>
+                        </Providers>
                     </body>
                 </html>
             );

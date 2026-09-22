@@ -48,15 +48,44 @@ export default function Page() {
         run — the page names no zod version anywhere.
       </Callout>
 
-      <Callout tone="warn" title="The `useInterrupt` half is not implementable here">
+      <Callout tone="warn" title="The `useInterrupt` half is mounted, and never fires">
         The page leads with a <code>useInterrupt</code> variant that reads{" "}
-        <code>interrupt?.metadata?.action</code>. <code>Interrupt.metadata</code>{" "}
-        is a real optional field on the AG-UI type, so the snippet is
-        well-formed — but it needs a backend that pauses a run and attaches an
-        action to it, and no agent in this repo does. The page does not say which
-        backends can do this, or how the action gets into <code>metadata</code>
-        in the first place; it shows only the consuming half. That is the gap,
-        and it is why this route takes the tool-call variant instead.
+        <code>interrupt?.metadata?.action</code>. It is on the demo page
+        verbatim, beside the tool-call variant — but it needs a backend that
+        pauses a run and attaches an action to it, and the page publishes only
+        the consuming half. It does not say which backends can do this or how
+        the action gets into <code>metadata</code>. No agent in this repo
+        pauses for it, so the card never appears from this path. Three more
+        gaps sit behind that one:
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          <li>
+            <strong>It does not type-check.</strong> The render callback returns{" "}
+            <code>null</code> when there is no action, but{" "}
+            <code>useInterrupt</code>&apos;s <code>render</code> is typed to
+            return a <code>ReactElement</code>: <code>tsc</code> reports TS2322.
+            Left as published.
+          </li>
+          <li>
+            <strong>It names no agent.</strong> With no <code>agentId</code>{" "}
+            and no agent on the provider, the hook resolves to{" "}
+            <code>&quot;default&quot;</code> — not an agent here — and quietly
+            listens to a provisional one. The page does not say where to mount
+            the component or which agent it follows.
+          </li>
+          <li>
+            <strong>
+              <code>metadata.action</code> would not arrive on this stack anyway.
+            </strong>{" "}
+            The installed LangGraph adapter (<code>@ag-ui/langgraph</code>{" "}
+            0.0.43) builds every interrupt&apos;s <code>metadata</code> as{" "}
+            <code>{"{ langgraph: { raw, ns, resumable, when } }"}</code>, so a
+            graph calling <code>interrupt({"{ action }"})</code> lands at{" "}
+            <code>metadata.langgraph.raw.action</code>. The snippet&apos;s
+            guard would return <code>null</code> and draw nothing. Read from the
+            adapter source; not exercised live, since there is no backend to
+            exercise it with.
+          </li>
+        </ul>
       </Callout>
 
       <Callout tone="warn" title="Nothing enforces the guardrails the page lists">
