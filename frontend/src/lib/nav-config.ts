@@ -158,6 +158,14 @@ export const NAV: NavGroup[] = [
         statusNote:
           "Both tabs are the page's code verbatim. The conditional tab was ⚠️ Partial until 04 Sep 2026 on an `enabled` callback destructuring an `eventValue` the event does not carry; that finding has been withdrawn.",
       },
+      {
+        path: "/generative-ui/a2ui",
+        title: "A2UI",
+        docPath: "/deepagents/generative-ui/a2ui",
+        summary: "Declarative agent-described UI surfaces (A2UI), switched on in the runtime with the a2ui option.",
+        status: "broken",
+        statusNote: "Reference-only. The agent-side code is Python-only (copilotkit.a2ui helpers); the TypeScript runtime snippets register an undefined myAgent.",
+      },
     ],
   },
   {
