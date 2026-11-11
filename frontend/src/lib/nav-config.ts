@@ -104,6 +104,16 @@ export const NAV: NavGroup[] = [
         agentId: "sample_agent",
         hasDemo: true,
       },
+      {
+        path: "/custom-look-and-feel/slots",
+        title: "Slots (Subcomponents)",
+        docPath: "/deepagents/custom-look-and-feel/slots",
+        summary: "CopilotChat slots three ways — Tailwind class string, props object, or replacement component — including nested slots and labels.",
+        status: "partial",
+        statusNote: "All seven generic samples mounted. The page's worked example is a missing deepagents::chat-slots snippet; CustomToolbar/CustomCopyButton/CustomUserMessage are labelled stand-ins; two samples need @ts-expect-error. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
     ],
   },
   {

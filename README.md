@@ -266,6 +266,11 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 *Pass:* indigo accents and the 0.625rem radius on the token tab; blue user bubbles and padded message list on the class tab; the custom welcome text and placeholder on the labels tab.
 *Fail:* a tab identical to the default chat. *Not mounted:* the v1 `CopilotKitCSSProperties` sample (`@copilotkit/react-ui` not installed) and the page's `theme.css` example (missing `deepagents::chat-customization-css` snippet). Not yet browser-checked.
 
+**`/custom-look-and-feel/slots`** → `sample_agent` — ⚠️ Partial. One tab per sample: Tailwind class strings, props override, a custom `messageView` component, nested slots, a three-levels-deep `copyButton`, a wrapped `toolCallsView`, and `labels`.
+*Try:* `hi` on each tab; on **toolCallsView**, `What's the weather in Paris?`.
+*Pass:* each tab visibly differs from the default chat as its sample says (grey message area + blue input, custom text-only message list with `Thinking...`, dashed custom user bubble and `Copy (custom)`, plain `Copy`, dashed tool-call box, custom placeholder/welcome/disclaimer).
+*Fail:* a tab rendering the stock chat. *Gaps:* the page's welcome/assistant/disclaimer example is a missing `deepagents::chat-slots` snippet; the nested-slot components are labelled stand-ins. Not yet browser-checked.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -293,6 +298,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [custom-look-and-feel/css](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css) | `/custom-look-and-feel/css` | `sample_agent` | ⚠️ Partial | Token / class / labels samples mounted; theme.css example missing for Deep Agents; v1 sample not mountable. Not yet browser-checked |
+| [custom-look-and-feel/slots](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots) | `/custom-look-and-feel/slots` | `sample_agent` | ⚠️ Partial | Generic samples mounted; worked example missing for Deep Agents; 3 stand-in components; 2 `@ts-expect-error`. Not yet browser-checked |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -370,6 +376,8 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 ### 2026-11 doc sync: new pages
 
 **N5. CSS Customization mixes v1 and v2, and its worked example is missing.** [custom-look-and-feel/css](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css) renders three "No demo found for `deepagents::chat-customization-css`" boxes where its scoped `theme.css` example should be. Its inline-variable sample imports `CopilotKitCSSProperties` from `@copilotkit/react-ui` (the deprecated v1 package) and sets `--copilot-kit-primary-color`, which the page itself says only styles v1 components; not mountable in this v2-only harness, so it is shown, not run.
+
+**N6. Slots: undefined components and slot typing.** [custom-look-and-feel/slots](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots) renders three missing `deepagents::chat-slots` snippets for its worked example. Its Nested Slots sample uses `CustomToolbar`, `CustomCopyButton` and `CustomUserMessage` without defining them (minimal labelled stand-ins added). Two samples fail `tsc` at @copilotkit/react-core 1.72 and are kept with `@ts-expect-error`: the custom `messageView` component destructures untyped props (TS7031), and a plain function component is not assignable to `messageView` / `userMessage`, whose slot type is the default component's `typeof` including its static sub-components (TS2322).
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -586,5 +594,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 
 **Custom Look and Feel**
 - [CSS Customization](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css)
+- [Slots (Subcomponents)](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots)
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
