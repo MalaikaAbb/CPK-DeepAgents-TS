@@ -190,6 +190,14 @@ export const NAV: NavGroup[] = [
         status: "not-started",
         statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
       },
+      {
+        path: "/generative-ui/components/state-and-actions",
+        title: "State and actions",
+        docPath: "/deepagents/generative-ui/components/state-and-actions",
+        summary: "Live app data inside generated UI, click handlers that run your code or message the agent, browser-side computed values, and kept user input.",
+        status: "not-started",
+        statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
+      },
     ],
   },
   {
