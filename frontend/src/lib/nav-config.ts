@@ -104,6 +104,14 @@ export const NAV: NavGroup[] = [
         agentId: "sample_agent",
         hasDemo: true,
       },
+      {
+        path: "/voice",
+        title: "Voice",
+        docPath: "/deepagents/voice",
+        summary: "Speech-to-text in the chat composer: a runtime transcriptionService makes /info advertise transcription, and CopilotChat grows a mic button.",
+        status: "broken",
+        statusNote: "Reference-only. All four code cells on the rendered Deep Agents page are 'No demo found for deepagents::voice' — no page, route or transcription service is published.",
+      },
     ],
   },
   {
