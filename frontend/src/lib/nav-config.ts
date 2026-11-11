@@ -92,6 +92,21 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    title: "Chat",
+    routes: [
+      {
+        path: "/multimodal-attachments",
+        title: "Multimodal Attachments",
+        docPath: "/deepagents/multimodal-attachments",
+        summary: "CopilotChat's attachments prop: drag-and-drop files, MIME/size limits, custom onUpload (data or URL), upload concurrency and error hooks.",
+        status: "partial",
+        statusNote: "Frontend-only page, run against sample_agent. Three tabs fail on upload by design: the page uses uploadToStorage, toast and an /api/upload route it never defines. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
+    ],
+  },
+  {
     title: "Rich Threads",
     routes: [
       {
