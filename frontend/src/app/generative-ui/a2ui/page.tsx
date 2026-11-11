@@ -51,8 +51,8 @@ export default function Page() {
 
       <Panel title="Everything the rendered page prints">
         <div className="space-y-4">
-          <CodeBlock filename=`app/api/copilotkit/[[...slug]]/route.ts` language="tsx" code={TS_0} />
-          <CodeBlock filename=`Python helpers — Python only` language="python" code={PY_0} />
+          <CodeBlock filename={`app/api/copilotkit/[[...slug]]/route.ts`} language="tsx" code={TS_0} />
+          <CodeBlock filename={`Python helpers — Python only`} language="python" code={PY_0} />
         </div>
       </Panel>
     </>

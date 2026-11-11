@@ -51,9 +51,9 @@ export default function Page() {
 
       <Panel title="Everything the rendered page prints">
         <div className="space-y-4">
-          <CodeBlock filename=`app/api/copilotkit/route.ts` language="tsx" code={TS_0} />
-          <CodeBlock filename=`frontend provider` language="tsx" code={TS_1} />
-          <CodeBlock filename=`agent/a2ui_dynamic.py — Python only` language="python" code={PY_0} />
+          <CodeBlock filename={`app/api/copilotkit/route.ts`} language="tsx" code={TS_0} />
+          <CodeBlock filename={`frontend provider`} language="tsx" code={TS_1} />
+          <CodeBlock filename={`agent/a2ui_dynamic.py — Python only`} language="python" code={PY_0} />
         </div>
       </Panel>
     </>

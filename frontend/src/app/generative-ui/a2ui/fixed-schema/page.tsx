@@ -92,10 +92,10 @@ export default function Page() {
 
       <Panel title="Everything the rendered page prints">
         <div className="space-y-4">
-          <CodeBlock filename=`app/api/copilotkit/route.ts` language="tsx" code={TS_0} />
-          <CodeBlock filename=`button with action context (schema JSON)` language="json" code={TS_1} />
-          <CodeBlock filename=`search_flights tool (Python) — Python only` language="python" code={PY_0} />
-          <CodeBlock filename=`apps/agent/main.py — Python only` language="python" code={PY_1} />
+          <CodeBlock filename={`app/api/copilotkit/route.ts`} language="tsx" code={TS_0} />
+          <CodeBlock filename={`button with action context (schema JSON)`} language="json" code={TS_1} />
+          <CodeBlock filename={`search_flights tool (Python) — Python only`} language="python" code={PY_0} />
+          <CodeBlock filename={`apps/agent/main.py — Python only`} language="python" code={PY_1} />
         </div>
       </Panel>
     </>
