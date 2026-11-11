@@ -124,6 +124,14 @@ export const NAV: NavGroup[] = [
         agentId: "sample_agent",
         hasDemo: true,
       },
+      {
+        path: "/custom-look-and-feel/headless-ui",
+        title: "Headless UI",
+        docPath: "/deepagents/custom-look-and-feel/headless-ui",
+        summary: "A chat built from useAgent, useCopilotKit and useRenderToolCall with no CopilotChat, up to a full hand-rolled message view.",
+        status: "broken",
+        statusNote: "Reference-only. Every code cell is a missing deepagents::headless-simple / headless-complete snippet, and the .md export's fences are empty, so there is no code to build from.",
+      },
     ],
   },
   {
