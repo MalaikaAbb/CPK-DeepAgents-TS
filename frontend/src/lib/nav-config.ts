@@ -158,6 +158,14 @@ export const NAV: NavGroup[] = [
         statusNote:
           "Both tabs are the page's code verbatim. The conditional tab was ⚠️ Partial until 04 Sep 2026 on an `enabled` callback destructuring an `eventValue` the event does not carry; that finding has been withdrawn.",
       },
+      {
+        path: "/generative-ui/json-render",
+        title: "JSON Render",
+        docPath: "/deepagents/generative-ui/json-render",
+        summary: "The agent emits a { root, elements } JSON spec that a custom assistant-message slot renders through a typed @json-render registry.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered Deep Agents page prints only an example of agent output; the demo/Code tab has no Deep Agents files, so neither the renderer, catalog/registry nor agent is published.",
+      },
     ],
   },
   {
