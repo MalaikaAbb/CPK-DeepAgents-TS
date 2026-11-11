@@ -89,6 +89,16 @@ export const NAV: NavGroup[] = [
         statusNote:
           "Needs the runtime in Intelligence mode, and a license token for the unlocked view — see the Quickstart's connection panel.",
       },
+      {
+        path: "/prebuilt-components/chat",
+        title: "CopilotChat",
+        docPath: "/deepagents/prebuilt-components/chat",
+        summary: "The base inline chat surface, sized by its container.",
+        status: "partial",
+        statusNote: "Only the import line is published; the usage example is a missing deepagents::agentic-chat ×2 snippet. The demo mounts <CopilotChat agentId=\"sample_agent\" /> (labelled, not from the page). Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
     ],
   },
   {
