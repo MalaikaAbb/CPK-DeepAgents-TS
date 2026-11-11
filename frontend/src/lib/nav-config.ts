@@ -166,6 +166,14 @@ export const NAV: NavGroup[] = [
         status: "broken",
         statusNote: "Reference-only. The rendered Deep Agents page prints only an example of agent output; the demo/Code tab has no Deep Agents files, so neither the renderer, catalog/registry nor agent is published.",
       },
+      {
+        path: "/generative-ui/hashbrown",
+        title: "Hashbrown",
+        docPath: "/deepagents/generative-ui/hashbrown",
+        summary: "A streamed sales dashboard: Hashbrown's UI kit and progressive JSON parser render the agent's ui array as it arrives.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered Deep Agents page prints only an example agent envelope; no renderer, UI kit or agent is published for Deep Agents.",
+      },
     ],
   },
   {

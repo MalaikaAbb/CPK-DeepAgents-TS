@@ -264,6 +264,9 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/generative-ui/json-render`** — ❌ **Broken (reference-only).** The agent replies with a `{ root, elements }` spec and a custom `messageView.assistantMessage` renders it via `@json-render/react`. For Deep Agents the rendered page prints only the example agent output; the renderer, catalog, registry and agent are not published (the demo covers Built-in Agent and LangGraph only).
 *Pass:* the gap panel and example output render.
 
+**`/generative-ui/hashbrown`** — ❌ **Broken (reference-only).** A Hashbrown UI kit + `useJsonParser` renders the agent's streamed `{ ui: [...] }` envelope as dashboard components. Only the example envelope is printed for Deep Agents.
+*Pass:* the gap panel and example output render.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -291,6 +294,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [generative-ui/json-render](https://docs.copilotkit.ai/deepagents/generative-ui/json-render) | `/generative-ui/json-render` | — | ❌ Broken | Reference-only: only the example agent output is printed for Deep Agents |
+| [generative-ui/hashbrown](https://docs.copilotkit.ai/deepagents/generative-ui/hashbrown) | `/generative-ui/hashbrown` | — | ❌ Broken | Reference-only: only the example agent envelope is printed for Deep Agents |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -584,5 +588,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 
 **Generative UI · Declarative**
 - [JSON Render](https://docs.copilotkit.ai/deepagents/generative-ui/json-render) — reference-only
+- [Hashbrown](https://docs.copilotkit.ai/deepagents/generative-ui/hashbrown) — reference-only
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
