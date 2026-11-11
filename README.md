@@ -279,6 +279,10 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/custom-look-and-feel/headless-ui`** — ❌ **Broken (reference-only).** The page describes a chat with no `CopilotChat`: `useAgent` for messages, `useCopilotKit().copilotkit.runAgent` to send, `useRenderToolCall` for tool calls, and a complete version that re-creates `CopilotChatMessageView` with `useRenderActivityMessage` and `useRenderCustomMessages`. All five code cells are missing `deepagents::headless-*` snippets (the `.md` fences are empty too).
 *Pass:* the gap panel renders.
 
+**`/custom-look-and-feel/reasoning-messages`** → `sample_agent` — ❌ Broken. The page's `CustomHeader`, `CustomContent` and `MyReasoningLayout` are mounted in four tabs on `messageView.reasoningMessage`. The agent that streams reasoning (`deepagents::reasoning-default` / `reasoning-custom`) is not published, so the slots run on `sample_agent`, which emits none.
+*Try:* `Think step by step: what is 17 × 23?`
+*Expected here:* a normal reply and no reasoning card. *Pass with a reasoning agent:* 🧠/💡 header, monospace content with a cursor, yellow card on the layout tab.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -309,6 +313,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [custom-look-and-feel/slots](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots) | `/custom-look-and-feel/slots` | `sample_agent` | ⚠️ Partial | Generic samples mounted; worked example missing for Deep Agents; 3 stand-in components; 2 `@ts-expect-error`. Not yet browser-checked |
 | [custom-look-and-feel/markdown](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown) | `/custom-look-and-feel/markdown` | `sample_agent` | ⚠️ Partial | All 3 samples mounted as printed; not yet browser-checked |
 | [custom-look-and-feel/headless-ui](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) | `/custom-look-and-feel/headless-ui` | — | ❌ Broken | Reference-only: all 5 code cells missing (`deepagents::headless-simple`, `headless-complete`); `.md` fences empty |
+| [custom-look-and-feel/reasoning-messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages) | `/custom-look-and-feel/reasoning-messages` | `sample_agent` | ❌ Broken | Slot code mounted; the reasoning agent is a missing `deepagents::reasoning-*` snippet, so no card can appear |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -390,6 +395,8 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 **N6. Slots: undefined components and slot typing.** [custom-look-and-feel/slots](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots) renders three missing `deepagents::chat-slots` snippets for its worked example. Its Nested Slots sample uses `CustomToolbar`, `CustomCopyButton` and `CustomUserMessage` without defining them (minimal labelled stand-ins added). Two samples fail `tsc` at @copilotkit/react-core 1.72 and are kept with `@ts-expect-error`: the custom `messageView` component destructures untyped props (TS7031), and a plain function component is not assignable to `messageView` / `userMessage`, whose slot type is the default component's `typeof` including its static sub-components (TS2322).
 
 **N7. Headless UI publishes no code at all.** [custom-look-and-feel/headless-ui](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) renders "No demo found" for `deepagents::headless-simple` and `deepagents::headless-complete` (×4), and the `.md` export's code fences for those cells are empty, so no framework's version is published. Reference-only, ❌ Broken.
+
+**N8. Reasoning Messages has slots but no reasoning source.** [custom-look-and-feel/reasoning-messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages) prints the slot components but its demo agents are missing `deepagents::reasoning-default` / `deepagents::reasoning-custom` snippets. Mounted on `sample_agent` (no reasoning), so nothing renders; ❌ Broken. Also, `reasoningMessage: MyReasoningLayout` does not typecheck at react-core 1.72: the slot is typed `typeof CopilotChatReasoningMessage`, including its static `Header`/`Content`/`Toggle`, so a plain function component is rejected (TS2322); kept with `@ts-expect-error`.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -609,5 +616,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Slots (Subcomponents)](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots)
 - [Markdown Rendering](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown)
 - [Headless UI](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) — reference-only, no snippet published
+- [Reasoning Messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages)
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.

@@ -132,6 +132,16 @@ export const NAV: NavGroup[] = [
         status: "broken",
         statusNote: "Reference-only. Every code cell is a missing deepagents::headless-simple / headless-complete snippet, and the .md export's fences are empty, so there is no code to build from.",
       },
+      {
+        path: "/custom-look-and-feel/reasoning-messages",
+        title: "Reasoning Messages",
+        docPath: "/deepagents/custom-look-and-feel/reasoning-messages",
+        summary: "Overriding the reasoning card's header, contentView and toggle slots, or its whole layout via a children render function.",
+        status: "broken",
+        statusNote: "The page's slot components are mounted, but the reasoning agent they need is a missing deepagents::reasoning-* snippet; on sample_agent (gpt-4o) no reasoning card ever appears.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
     ],
   },
   {
