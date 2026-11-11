@@ -56,6 +56,7 @@ function PropsOverrideChat() {
 // @ts-expect-error -- page code: the destructured props carry no type annotation (TS7031 implicit any under strict).
 const CustomMessageView = ({ messages, isRunning }) => (
   <div className="space-y-4 p-6">
+    {/* @ts-expect-error -- page code: `msg` is implicitly any because `messages` is untyped (TS7006). */}
     {messages?.map((msg) => (
       <div key={msg.id} className={msg.role === "user" ? "text-right" : "text-left"}>
         {msg.content}
