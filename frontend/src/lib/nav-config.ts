@@ -166,6 +166,14 @@ export const NAV: NavGroup[] = [
         status: "broken",
         statusNote: "Reference-only. The agent-side code is Python-only (copilotkit.a2ui helpers); the TypeScript runtime snippets register an undefined myAgent.",
       },
+      {
+        path: "/generative-ui/a2ui/dynamic-schema",
+        title: "Dynamic Schema A2UI",
+        docPath: "/deepagents/generative-ui/a2ui/dynamic-schema",
+        summary: "An injected generate_a2ui tool where a secondary LLM writes both the A2UI schema and data from the prompt.",
+        status: "broken",
+        statusNote: "Reference-only. The agent is printed only as Python (agent/a2ui_dynamic.py); the frontend and runtime snippets use undefined myCatalog / myAgent.",
+      },
     ],
   },
   {
