@@ -97,6 +97,11 @@ import { createDeepAgent } from "deepagents";
 
 import { MODEL } from "./shared.js";
 
+// Model: the page prints `model: "openai:gpt-6-luna"` (was `openai:gpt-4o`
+// until the 2026-11 doc sync). Both agents keep reading `MODEL`
+// (`OPENAI_MODEL`, default `gpt-4o`) like the repo's other env-driven agents;
+// set `OPENAI_MODEL=gpt-6-luna` to run the page's literal.
+
 // The page's prompt, which leans on the state note `exposeState` is meant to
 // add. It does not arrive — see the note at the top of this file — so the model
 // only knows the name from the conversation, not from state.

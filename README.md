@@ -358,6 +358,7 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+The 2026-11 doc sync moved [interrupt-based](https://docs.copilotkit.ai/deepagents/generative-ui/your-components/interrupt-based)'s `createDeepAgent` from `openai:gpt-4o` to `openai:gpt-6-luna`; `interrupt_agent` / `interrupt_multi_agent` still read `OPENAI_MODEL` (set it to `gpt-6-luna` to match the page).
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
