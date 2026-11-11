@@ -119,6 +119,16 @@ export const NAV: NavGroup[] = [
         agentId: "sample_agent",
         hasDemo: true,
       },
+      {
+        path: "/prebuilt-components/chat-controls",
+        title: "Open, close, and feedback",
+        docPath: "/deepagents/prebuilt-components/chat-controls",
+        summary: "Controlling the sidebar's open state from your own UI (open/onOpenChange or setModalOpen) and capturing thumbs-up/down feedback.",
+        status: "partial",
+        statusNote: "Open/close samples mounted as printed. The feedback handlers call an analytics object the page never defines, so a thumb click throws. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
     ],
   },
   {
