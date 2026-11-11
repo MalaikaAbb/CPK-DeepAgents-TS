@@ -158,6 +158,14 @@ export const NAV: NavGroup[] = [
         statusNote:
           "Both tabs are the page's code verbatim. The conditional tab was ⚠️ Partial until 04 Sep 2026 on an `enabled` callback destructuring an `eventValue` the event does not carry; that finding has been withdrawn.",
       },
+      {
+        path: "/generative-ui/components",
+        title: "Components and surfaces",
+        docPath: "/deepagents/generative-ui/components",
+        summary: "Let the agent render your own React components, in the chat and in named areas of the page, through a provider-level generativeUI catalog.",
+        status: "not-started",
+        statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
+      },
     ],
   },
   {

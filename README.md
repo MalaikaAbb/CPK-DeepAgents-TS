@@ -259,6 +259,10 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Generative UI · Components and surfaces
+
+**`/generative-ui/components`** — 🚧 **Not started (needs CopilotKit ≥ 1.83).** Let the agent render your own React components, in the chat and in named areas of the page, through a provider-level generativeUI catalog. The page's React code (5 block(s), Angular omitted) is shown verbatim on the route; nothing is mounted because `@copilotkit/react-core/v2/generative-ui` is not in the locked 1.72.0.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -285,6 +289,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [generative-ui/components](https://docs.copilotkit.ai/deepagents/generative-ui/components) | `/generative-ui/components` | — | 🚧 Not started | Needs `@copilotkit/react-core` ≥ 1.83 (`/v2/generative-ui`); repo locks 1.72.0. Code shown verbatim |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -358,6 +363,10 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+
+### 2026-11 doc sync: new pages
+
+**N14. Components and surfaces need a newer CopilotKit than this repo locks.** All nine [generative-ui/components](https://docs.copilotkit.ai/deepagents/generative-ui/components) pages build on `@copilotkit/react-core/v2/generative-ui` (`standardUI`, `createGenerativeUI`, `GenerativeUISurface`, `useGenerativeUIState`, `exportA2UICatalog`, …) and the provider's `generativeUI` prop. That subpath is absent in react-core ≤ 1.79 and present by 1.83; this repo locks 1.72.0. The pages don't state a minimum version. Upgrading CopilotKit plus the matching `@ag-ui/*` pins and lockfile is outside this doc sync, so the routes show the page code verbatim and are 🚧 Not started. When built, the section's TanStack `BuiltInAgent` runtime snippet must become a Deep Agents graph (AGENTS.md rule 2). Several samples also import unprinted local modules (`./shop-ui`, `./cart.store`, `./catalog`, `./product-row.component`) and `@valibot/to-json-schema`.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -571,5 +580,8 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Predictive State Updates — custom graph, tool emission](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates?agent-type=custom-graph&state-emission=tool-emission)
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
+
+**Generative UI · Components and surfaces**
+- [Components and surfaces](https://docs.copilotkit.ai/deepagents/generative-ui/components) — code shown, not run (needs CopilotKit ≥ 1.83)
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
