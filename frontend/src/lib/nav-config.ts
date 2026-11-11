@@ -222,6 +222,14 @@ export const NAV: NavGroup[] = [
         status: "not-started",
         statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
       },
+      {
+        path: "/generative-ui/components/from-a2ui",
+        title: "Adopt from A2UI",
+        docPath: "/deepagents/generative-ui/components/from-a2ui",
+        summary: "Migrating from the A2UI v0.9 renderer to components and surfaces (A2UI 1.0): provider, catalog, operations and agent input.",
+        status: "not-started",
+        statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
+      },
     ],
   },
   {
