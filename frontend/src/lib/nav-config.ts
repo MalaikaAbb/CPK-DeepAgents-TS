@@ -84,10 +84,10 @@ export const NAV: NavGroup[] = [
         title: "Threads Drawer",
         docPath: "/deepagents/prebuilt-components/copilot-threads-drawer",
         summary:
-          "The drop-in conversation sidebar, wired with no active-thread state of its own.",
+          "The drop-in conversation sidebar, wired with no active-thread state of its own — hosted by CopilotChat or CopilotSidebar, with an app-owned New conversation button, or with an app-controlled threadId.",
         status: "working",
         statusNote:
-          "Needs the runtime in Intelligence mode, and a license token for the unlocked view — see the Quickstart's connection panel.",
+          "Needs the runtime in Intelligence mode, and a license token for the unlocked view — see the Quickstart's connection panel. The sidebar, own-button and controlled tabs (2026-11 sync) are not yet browser-checked.",
       },
     ],
   },
