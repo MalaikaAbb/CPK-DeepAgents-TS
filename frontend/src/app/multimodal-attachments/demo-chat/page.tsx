@@ -153,6 +153,7 @@ function OnError() {
       agentId="sample_agent"
       attachments={{ enabled: true }}
       onError={(event) => {
+        // @ts-expect-error -- page code: at react-core 1.72 `onError`'s event is a union without `code` / `error` on every member (TS2339). README §9 N2.
         console.error(`[${event.code}]`, event.error.message);
       }}
     />

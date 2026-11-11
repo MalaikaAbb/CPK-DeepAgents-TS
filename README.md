@@ -377,7 +377,7 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 ### 2026-11 doc sync: new pages
 
-**N2. Multimodal Attachments uses helpers it never defines.** [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) calls `uploadToStorage(file)` (metadata and concurrency samples), reads `currentUser.id` (metadata), calls `toast.error` with no import (`onUploadFailed`), and POSTs to an `/api/upload` route it never publishes (URL sample). Kept as printed; `@ts-expect-error` on the two undefined names. Those tabs fail at upload time. The page's first sample also targets `agentId="my-agent"`.
+**N2. Multimodal Attachments uses helpers it never defines.** [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) calls `uploadToStorage(file)` (metadata and concurrency samples), reads `currentUser.id` (metadata), calls `toast.error` with no import (`onUploadFailed`), and POSTs to an `/api/upload` route it never publishes (URL sample). Kept as printed; `@ts-expect-error` on the two undefined names. Those tabs fail at upload time. The page's first sample also targets `agentId="my-agent"`. Its `onError={(event) => console.error(`[${event.code}]`, event.error.message)}` sample fails `tsc` at react-core 1.72 (TS2339: `code` / `error` don't exist on the event union); kept with `@ts-expect-error`.
 
 **N3. Voice publishes no Deep Agents code.** [voice](https://docs.copilotkit.ai/deepagents/voice) renders four "No demo found for `deepagents::voice`" boxes (frontend page, sample-audio button, `/api/copilotkit-voice` runtime route, transcription service). The `.md` fallback imports an unpublished `@/lib/transcription-service` and `VoiceChat`. Reference-only, ❌ Broken.
 
