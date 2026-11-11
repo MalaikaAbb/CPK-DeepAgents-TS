@@ -44,6 +44,7 @@ function PropsOverrideChat() {
       agentId={AGENT_ID}
       messageView={{
         className: "my-custom-messages",
+        // @ts-expect-error Doc bug kept verbatim: `"data-testid"` is not a known prop of the messageView slot object (TS2353).
         "data-testid": "message-view",
       }}
       input={{ autoFocus: true }}
