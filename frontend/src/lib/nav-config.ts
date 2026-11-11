@@ -214,6 +214,14 @@ export const NAV: NavGroup[] = [
         status: "not-started",
         statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
       },
+      {
+        path: "/generative-ui/components/markdown-mode",
+        title: "Markdown mode",
+        docPath: "/deepagents/generative-ui/components/markdown-mode",
+        summary: "The agent writes UI as a2ui code blocks inside its markdown reply, streamed and rendered with no tool call.",
+        status: "not-started",
+        statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
+      },
     ],
   },
   {

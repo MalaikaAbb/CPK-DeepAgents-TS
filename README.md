@@ -275,6 +275,8 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/generative-ui/components/transports`** — 🚧 **Not started (needs CopilotKit ≥ 1.83).** How the agent delivers generated UI: a render_ui tool call, or a2ui blocks inside its markdown reply. The page's React code (2 block(s), Angular omitted) is shown verbatim on the route; nothing is mounted because `@copilotkit/react-core/v2/generative-ui` is not in the locked 1.72.0.
 
+**`/generative-ui/components/markdown-mode`** — 🚧 **Not started (needs CopilotKit ≥ 1.83).** The agent writes UI as a2ui code blocks inside its markdown reply, streamed and rendered with no tool call. The page's React code (5 block(s), Angular omitted) is shown verbatim on the route; nothing is mounted because `@copilotkit/react-core/v2/generative-ui` is not in the locked 1.72.0.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -308,6 +310,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [generative-ui/components/state-and-actions](https://docs.copilotkit.ai/deepagents/generative-ui/components/state-and-actions) | `/generative-ui/components/state-and-actions` | — | 🚧 Not started | Needs `@copilotkit/react-core` ≥ 1.83 (`/v2/generative-ui`); repo locks 1.72.0. Code shown verbatim |
 | [generative-ui/components/theming](https://docs.copilotkit.ai/deepagents/generative-ui/components/theming) | `/generative-ui/components/theming` | — | 🚧 Not started | Needs `@copilotkit/react-core` ≥ 1.83 (`/v2/generative-ui`); repo locks 1.72.0. Code shown verbatim |
 | [generative-ui/components/transports](https://docs.copilotkit.ai/deepagents/generative-ui/components/transports) | `/generative-ui/components/transports` | — | 🚧 Not started | Needs `@copilotkit/react-core` ≥ 1.83 (`/v2/generative-ui`); repo locks 1.72.0. Code shown verbatim |
+| [generative-ui/components/markdown-mode](https://docs.copilotkit.ai/deepagents/generative-ui/components/markdown-mode) | `/generative-ui/components/markdown-mode` | — | 🚧 Not started | Needs `@copilotkit/react-core` ≥ 1.83 (`/v2/generative-ui`); repo locks 1.72.0. Code shown verbatim |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -607,5 +610,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [State and actions](https://docs.copilotkit.ai/deepagents/generative-ui/components/state-and-actions) — code shown, not run (needs CopilotKit ≥ 1.83)
 - [Theming](https://docs.copilotkit.ai/deepagents/generative-ui/components/theming) — code shown, not run (needs CopilotKit ≥ 1.83)
 - [Transports](https://docs.copilotkit.ai/deepagents/generative-ui/components/transports) — code shown, not run (needs CopilotKit ≥ 1.83)
+- [Markdown mode](https://docs.copilotkit.ai/deepagents/generative-ui/components/markdown-mode) — code shown, not run (needs CopilotKit ≥ 1.83)
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
