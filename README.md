@@ -167,7 +167,7 @@ Every route has a notes page (source, discrepancies, a **Try it** box) and, wher
 
 ### Getting Started
 
-**`/`** — Introduction. Orientation and the live graph roster. Nothing to drive.
+**`/`** — Introduction. Orientation and the live graph roster, plus the runtime-route "connect" snippet the doc page prints (2026-11), shown beside a pointer to the harness's own mount. Nothing to drive.
 
 **`/quickstart`** → `sample_agent`
 Proves the whole stack in one message: a Deep Agent with a single `tool()` call, published by the LangGraph server, reached through `CopilotRuntime`, driven by a `CopilotSidebar`.
