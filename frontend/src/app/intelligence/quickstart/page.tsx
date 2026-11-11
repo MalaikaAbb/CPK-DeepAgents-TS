@@ -117,7 +117,7 @@ export default function Page() {
         <div className="mt-4">
           <TryIt
             prompts={["Multi-route tab: press GET /api/copilotkit/info, then 'Tell me a one-line joke.'", "Single-route tab: Tell me a one-line joke."]}
-            expect="Multi-route: /info answers 200 listing sample_agent, with mode \"intelligence\" when CPK_INTELLIGENCE_API_KEY is set (SSE otherwise), and the reply streams through /api/copilotkit/agent/sample_agent/run. Single-route: the reply streams normally. Every request in the network tab is a POST to /api/copilotkit-single carrying a { method, params, body } envelope — no /info, /agent/sample_agent/run, or /threads paths at all."
+            expect="Multi-route: /info answers 200 listing sample_agent, with mode 'intelligence' when CPK_INTELLIGENCE_API_KEY is set (SSE otherwise), and the reply streams through /api/copilotkit/agent/sample_agent/run. Single-route: the reply streams normally. Every request in the network tab is a POST to /api/copilotkit-single carrying a { method, params, body } envelope — no /info, /agent/sample_agent/run, or /threads paths at all."
             fail="The chat never connects, or requests fall back to REST paths under /api/copilotkit-single, which would mean the provider negotiated its way off the single-route transport."
           />
         </div>
