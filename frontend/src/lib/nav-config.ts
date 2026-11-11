@@ -112,6 +112,14 @@ export const NAV: NavGroup[] = [
         status: "broken",
         statusNote: "Reference-only. All four code cells on the rendered Deep Agents page are 'No demo found for deepagents::voice' — no page, route or transcription service is published.",
       },
+      {
+        path: "/generative-ui/reasoning",
+        title: "Reasoning",
+        docPath: "/deepagents/generative-ui/reasoning",
+        summary: "Reasoning tokens rendered in the chat: the built-in Thinking card, or a custom messageView.reasoningMessage slot.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered Deep Agents page shows 'No demo found' for deepagents::reasoning-default and deepagents::reasoning-custom in every code cell, and no reasoning agent is published.",
+      },
     ],
   },
   {

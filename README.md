@@ -269,6 +269,9 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/voice`** — ❌ **Broken (reference-only).** The page explains that a `transcriptionService` on the v2 runtime makes `/info` report `audioFileTranscriptionEnabled`, which makes `CopilotChat` render a mic that POSTs audio to `/transcribe`. On the rendered Deep Agents page all four code cells are missing `deepagents::voice` snippets, so nothing is mounted; this runtime has no transcription service and no chat here shows a mic.
 *Pass:* the gap panel renders.
 
+**`/generative-ui/reasoning`** — ❌ **Broken (reference-only).** Models that stream reasoning produce `REASONING_MESSAGE_*` events that `CopilotChat` renders as a built-in "Thinking…" card, or through a custom `messageView.reasoningMessage` slot. Every code cell on the rendered Deep Agents page is a missing `deepagents::reasoning-default` / `deepagents::reasoning-custom` snippet, so nothing is mounted.
+*Pass:* the gap panel renders.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -297,6 +300,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) | `/multimodal-attachments` | `sample_agent` | ⚠️ Partial | Frontend-only; 3 of 7 tabs use undefined helpers (`uploadToStorage`, `toast`, `/api/upload`). Not yet browser-checked |
 | [voice](https://docs.copilotkit.ai/deepagents/voice) | `/voice` | — | ❌ Broken | Reference-only: all 4 code cells are missing `deepagents::voice` snippets |
+| [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) | `/generative-ui/reasoning` | — | ❌ Broken | Reference-only: all code cells are missing `deepagents::reasoning-*` snippets |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -376,6 +380,8 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 **N2. Multimodal Attachments uses helpers it never defines.** [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) calls `uploadToStorage(file)` (metadata and concurrency samples), reads `currentUser.id` (metadata), calls `toast.error` with no import (`onUploadFailed`), and POSTs to an `/api/upload` route it never publishes (URL sample). Kept as printed; `@ts-expect-error` on the two undefined names. Those tabs fail at upload time. The page's first sample also targets `agentId="my-agent"`.
 
 **N3. Voice publishes no Deep Agents code.** [voice](https://docs.copilotkit.ai/deepagents/voice) renders four "No demo found for `deepagents::voice`" boxes (frontend page, sample-audio button, `/api/copilotkit-voice` runtime route, transcription service). The `.md` fallback imports an unpublished `@/lib/transcription-service` and `VoiceChat`. Reference-only, ❌ Broken.
+
+**N4. Reasoning publishes no Deep Agents code.** [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) renders "No demo found" for `deepagents::reasoning-default` (1 cell) and `deepagents::reasoning-custom` (2 cells), and publishes no agent that emits reasoning. The `.md` fallback also calls unpublished `useReasoning*Suggestions` hooks and a `ReasoningBlock` component. Reference-only, ❌ Broken.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -593,5 +599,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 **Chat**
 - [Multimodal Attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments)
 - [Voice](https://docs.copilotkit.ai/deepagents/voice) — reference-only, no Deep Agents snippet published
+- [Reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) — reference-only, no Deep Agents snippet published
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
