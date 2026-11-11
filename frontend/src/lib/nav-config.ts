@@ -158,6 +158,14 @@ export const NAV: NavGroup[] = [
         statusNote:
           "Both tabs are the page's code verbatim. The conditional tab was ⚠️ Partial until 04 Sep 2026 on an `enabled` callback destructuring an `eventValue` the event does not carry; that finding has been withdrawn.",
       },
+      {
+        path: "/generative-ui/tool-based",
+        title: "Components as Tools",
+        docPath: "/deepagents/generative-ui/tool-based",
+        summary: "A React component registered with useComponent and exposed to the agent as a frontend tool, rendered inline when called.",
+        status: "broken",
+        statusNote: "Reference-only. The useComponent registration is a missing deepagents::gen-ui-tool-based snippet, and the backend steps are printed in Python only (no TypeScript tab).",
+      },
     ],
   },
   {
