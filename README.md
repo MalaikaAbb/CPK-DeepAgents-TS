@@ -266,6 +266,9 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 *Try:* `Draw a simple flowchart of a login process in Excalidraw`.
 *Pass:* an interactive Excalidraw canvas renders inline. *Fail:* a text-only reply, a connection error to :8123, or an MCP fetch error. Not yet browser-checked.
 
+**`/generative-ui/open-generative-ui`** — ❌ **Broken (reference-only).** The runtime lets the agent stream full HTML/CSS/JS UIs into a sandbox in the chat; an advanced setup registers sandbox functions on the provider. Every setup snippet is missing for Deep Agents (`deepagents::open-gen-ui`, `open-gen-ui-advanced`); only a CDN example is printed.
+*Pass:* the gap panel renders.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -293,6 +296,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [generative-ui/mcp-apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps) | `/generative-ui/mcp-apps` | `sample_agent` | ⚠️ Partial | Page route mounted at `/api/copilotkit-mcp-apps`; needs `LANGGRAPH_DEPLOYMENT_URL` (page falls back to 8123); not yet browser-checked |
+| [generative-ui/open-generative-ui](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) | `/generative-ui/open-generative-ui` | — | ❌ Broken | Reference-only: all setup snippets missing for Deep Agents |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -370,6 +374,8 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 ### 2026-11 doc sync: new pages
 
 **N15. MCP Apps: port fallback and an unlisted package.** [generative-ui/mcp-apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps)'s route falls back to `http://localhost:8123` for the LangGraph server and exports only `GET`/`POST`. It imports `MCPAppsMiddleware` from `@ag-ui/mcp-apps-middleware` without telling you to install it; it resolves here only because `@copilotkit/runtime` 1.72.0 depends on 0.1.1. Kept as printed at `/api/copilotkit-mcp-apps` (its own mount, `basePath` changed to match). Watch for an `@ag-ui/client` type clash on `agent.use(...)`: the root pins `@ag-ui/client` 1.0.0 while CopilotKit 1.72 nests 0.0.59 (see AGENTS.md).
+
+**N16. Open Generative UI publishes no Deep Agents setup.** [generative-ui/open-generative-ui](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) renders "No demo found" for `deepagents::open-gen-ui` (×2) and `deepagents::open-gen-ui-advanced` (×2): runtime enablement, chat page and sandbox-function provider are all missing. Only a CDN `<script>` example is printed. Reference-only, ❌ Broken.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -586,5 +592,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 
 **Generative UI · Open-ended**
 - [MCP Apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps)
+- [Open Generative UI](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) — reference-only
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.

@@ -168,6 +168,14 @@ export const NAV: NavGroup[] = [
         agentId: "sample_agent",
         hasDemo: true,
       },
+      {
+        path: "/generative-ui/open-generative-ui",
+        title: "Open Generative UI",
+        docPath: "/deepagents/generative-ui/open-generative-ui",
+        summary: "Agent-written HTML/CSS/JS documents streamed into the chat and run in a sandbox, optionally calling back into the app.",
+        status: "broken",
+        statusNote: "Reference-only. Both setups (minimal and with app tool calling) are missing deepagents::open-gen-ui / open-gen-ui-advanced snippets; only a CDN <script> example is printed.",
+      },
     ],
   },
   {
