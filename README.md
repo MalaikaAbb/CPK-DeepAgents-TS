@@ -259,6 +259,13 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Generative UI · Open-ended
+
+**`/generative-ui/mcp-apps`** → `sample_agent` via `/api/copilotkit-mcp-apps` — ⚠️ Partial. The page's runtime route as printed: a `LangGraphAgent` on graph `sample_agent` with `MCPAppsMiddleware` pointing at `https://mcp.excalidraw.com`, mounted on its own path so the shared runtime is untouched; the demo nests a `CopilotKitProvider` aimed at it.
+*Setup:* set `LANGGRAPH_DEPLOYMENT_URL=http://localhost:8124` in `frontend/.env.local` (the page falls back to 8123).
+*Try:* `Draw a simple flowchart of a login process in Excalidraw`.
+*Pass:* an interactive Excalidraw canvas renders inline. *Fail:* a text-only reply, a connection error to :8123, or an MCP fetch error. Not yet browser-checked.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -285,6 +292,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [generative-ui/mcp-apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps) | `/generative-ui/mcp-apps` | `sample_agent` | ⚠️ Partial | Page route mounted at `/api/copilotkit-mcp-apps`; needs `LANGGRAPH_DEPLOYMENT_URL` (page falls back to 8123); not yet browser-checked |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -358,6 +366,10 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+
+### 2026-11 doc sync: new pages
+
+**N15. MCP Apps: port fallback and an unlisted package.** [generative-ui/mcp-apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps)'s route falls back to `http://localhost:8123` for the LangGraph server and exports only `GET`/`POST`. It imports `MCPAppsMiddleware` from `@ag-ui/mcp-apps-middleware` without telling you to install it; it resolves here only because `@copilotkit/runtime` 1.72.0 depends on 0.1.1. Kept as printed at `/api/copilotkit-mcp-apps` (its own mount, `basePath` changed to match). Watch for an `@ag-ui/client` type clash on `agent.use(...)`: the root pins `@ag-ui/client` 1.0.0 while CopilotKit 1.72 nests 0.0.59 (see AGENTS.md).
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -571,5 +583,8 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Predictive State Updates — custom graph, tool emission](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates?agent-type=custom-graph&state-emission=tool-emission)
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
+
+**Generative UI · Open-ended**
+- [MCP Apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps)
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.

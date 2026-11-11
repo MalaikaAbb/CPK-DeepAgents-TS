@@ -158,6 +158,16 @@ export const NAV: NavGroup[] = [
         statusNote:
           "Both tabs are the page's code verbatim. The conditional tab was ⚠️ Partial until 04 Sep 2026 on an `enabled` callback destructuring an `eventValue` the event does not carry; that finding has been withdrawn.",
       },
+      {
+        path: "/generative-ui/mcp-apps",
+        title: "MCP Apps",
+        docPath: "/deepagents/generative-ui/mcp-apps",
+        summary: "MCPAppsMiddleware on the deep agent's LangGraphAgent, so MCP-server tools render their own sandboxed UI in the chat.",
+        status: "partial",
+        statusNote: "The page's runtime route is mounted verbatim at /api/copilotkit-mcp-apps with the Excalidraw MCP server. Its deployment-URL fallback is :8123 (this repo uses 8124 — set LANGGRAPH_DEPLOYMENT_URL), and @ag-ui/mcp-apps-middleware is only a transitive dependency. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
     ],
   },
   {
