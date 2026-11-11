@@ -48,6 +48,7 @@ agent.use(
 );
 
 const runtime = new CopilotRuntime({
+  // @ts-expect-error Duplicate @ag-ui/client copies: the root 1.0.0 LangGraphAgent's Message[] is not CopilotKit 1.72's nested 0.0.59 AbstractAgent type (TS2769). Page code kept as printed; see README §9 N15.
   agents: { sample_agent: agent },
   runner: new InMemoryAgentRunner(),
 });
