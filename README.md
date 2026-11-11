@@ -259,6 +259,11 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Human-in-the-loop
+
+**`/human-in-the-loop/index`** — ❌ **Broken (reference-only).** Compares `useHumanInTheLoop` (the model calls a client tool that renders and `respond`s) with `useInterrupt` (the graph calls `interrupt()`). Both examples are missing `deepagents::hitl-in-chat` snippets. The route links to this repo's working Governed Actions and Interrupt-based HITL routes.
+*Pass:* the gap panel renders.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -285,6 +290,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [human-in-the-loop/index](https://docs.copilotkit.ai/deepagents/human-in-the-loop/index) | `/human-in-the-loop/index` | — | ❌ Broken | Reference-only: `deepagents::hitl-in-chat` snippets missing |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -358,6 +364,10 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+
+### 2026-11 doc sync: new pages
+
+**N17. HITL pages: missing examples, and a wrong "not available" banner.** [human-in-the-loop/index](https://docs.copilotkit.ai/deepagents/human-in-the-loop/index) renders two missing `deepagents::hitl-in-chat` snippets. [useInterrupt](https://docs.copilotkit.ai/deepagents/human-in-the-loop/useInterrupt) and [headless](https://docs.copilotkit.ai/deepagents/human-in-the-loop/headless) open with **"Not available on this framework"**, claiming the feature needs a native `interrupt(...)` primitive such as LangGraph's. Deep Agents are LangGraph graphs, and this repo's `/generative-ui/your-components/interrupt-based` runs `useInterrupt` against a Deep Agents middleware calling `interrupt()` successfully, so the banner contradicts a working route. None of the three publishes a Deep Agents backend; all three are reference-only, ❌ Broken.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -571,5 +581,8 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Predictive State Updates — custom graph, tool emission](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates?agent-type=custom-graph&state-emission=tool-emission)
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
+
+**Human-in-the-loop**
+- [HITL Overview](https://docs.copilotkit.ai/deepagents/human-in-the-loop/index) — reference-only
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.

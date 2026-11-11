@@ -194,6 +194,14 @@ export const NAV: NavGroup[] = [
         statusNote:
           "The tool-call variant, with the page's schema unchanged — `z.record(z.unknown())` is valid on this repo's zod 3. The `useInterrupt` variant needs a backend that pauses a run and attaches `interrupt.metadata.action`, which no agent here does.",
       },
+      {
+        path: "/human-in-the-loop/index",
+        title: "HITL Overview",
+        docPath: "/deepagents/human-in-the-loop/index",
+        summary: "The two ways to pause an agent for the user: model-initiated useHumanInTheLoop tools and graph-enforced useInterrupt.",
+        status: "broken",
+        statusNote: "Reference-only. Both worked examples are missing deepagents::hitl-in-chat snippets and the setup is 'not bundled for deepagents'. Working examples of both patterns exist on Governed Actions and Interrupt-based HITL.",
+      },
     ],
   },
   {
