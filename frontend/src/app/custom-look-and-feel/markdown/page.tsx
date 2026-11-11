@@ -21,7 +21,7 @@ export default function Page() {
             prompts={[
               "Reply with a level-2 heading 'Links' and a markdown link to https://copilotkit.ai",
             ]}
-            expect="components map: the heading has an orange left bar and the link is orange and dotted-underlined, still opening in a new tab (target/rel survive the spread) and with no node=\"[object Object]\" attribute. class string: the reply is smaller with taller line height. replace renderer: the raw markdown (## and [](...)) shows as preformatted text."
+            expect="components map: the heading has an orange left bar and the link is orange and dotted-underlined, still opening in a new tab (target/rel survive the spread) and with no node='[object Object]' attribute. class string: the reply is smaller with taller line height. replace renderer: the raw markdown (## and [](...)) shows as preformatted text."
             fail="Default-styled heading and link in the first tab, or a literal node attribute in the DOM."
           />
         </div>
