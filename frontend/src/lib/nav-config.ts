@@ -202,6 +202,14 @@ export const NAV: NavGroup[] = [
         status: "broken",
         statusNote: "Reference-only. Both worked examples are missing deepagents::hitl-in-chat snippets and the setup is 'not bundled for deepagents'. Working examples of both patterns exist on Governed Actions and Interrupt-based HITL.",
       },
+      {
+        path: "/human-in-the-loop/useInterrupt",
+        title: "Pausing the Agent for Input",
+        docPath: "/deepagents/human-in-the-loop/useInterrupt",
+        summary: "useInterrupt rendering a component for a graph-enforced interrupt() and resuming the run with resolve/cancel.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered page says 'Not available on this framework' (contradicted by this repo's working Interrupt-based HITL route) and publishes no Deep Agents backend; its frontend snippets are shown, not mounted.",
+      },
     ],
   },
   {
