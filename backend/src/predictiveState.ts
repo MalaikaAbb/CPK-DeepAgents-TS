@@ -7,7 +7,10 @@
  * a state key and streams the argument into that key as the model writes it —
  * no `copilotkitEmitState` call and no `copilotkitCustomizeConfig` anywhere.
  *
- * Both blocks below are the page's TypeScript verbatim, bar the model id. This
+ * Both blocks below are the page's TypeScript verbatim, including the model
+ * id `openai:gpt-6-luna` (2026-11 doc sync; was `openai:gpt-5.4`, which this
+ * file used to swap for OPENAI_MODEL — switched to the literal so all three
+ * variants on this route run the page's model). This
  * is the one variant of this page that needs no glue at all: unlike the Python
  * tab, the page's `createDeepAgent` call already lists `observedStepsMiddleware`
  * in its `middleware` array, so the state schema is actually attached.
@@ -34,7 +37,6 @@ import {
 } from "@copilotkit/sdk-js/langgraph-middlewares";
 import { tool } from "langchain";
 
-import { MODEL } from "./shared.js";
 
 const stepProgressTool = tool(async (args) => args, {
   name: "step_progress_tool",
@@ -43,7 +45,7 @@ const stepProgressTool = tool(async (args) => args, {
 });
 
 export const agent = createDeepAgent({
-  model: MODEL,
+  model: "openai:gpt-6-luna",
   tools: [stepProgressTool],
   middleware: [
     observedStepsMiddleware,

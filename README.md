@@ -246,7 +246,7 @@ Reading agent state as ordinary reactive React state.
 
 **`/shared-state/predictive-state-updates`** → `predictive_state_agent`, `predictive_manual_graph`, `predictive_tool_graph`
 **All three of the page's variants are live here**, behind a toggle — the sharpest advantage this repo has over the Python sibling, whose tabs only sketch the custom graphs.
-*Try:* `Plan and execute a website redesign` on each tab.
+*Try:* `Plan and execute a website redesign` on each tab. (All three graphs run the page's `gpt-6-luna` since 2026-11 — see §9 item 12.)
 *Pass:* **Prebuilt** — step rows appear one at a time *before* the chat message completes. **Custom · manual** — exactly four fixed rows, one per second, then an ordinary answer (verified: four distinct states in order). **Custom · tool** — steps stream as the model writes the tool call, then a `ToolNode` runs it and the graph loops back.
 *Fail:* nothing at all — the provider is `<CopilotKitProvider>` rather than `<CopilotKit>`; see [§9 item 5](#9-known-issues--docvsimplementation-discrepancies).
 
@@ -358,6 +358,7 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+Exception since the 2026-11 doc sync: all three [predictive-state-updates](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates) variants now print `gpt-6-luna`, and the two custom graphs add `reasoning_effort: "none"` to `modelKwargs`. That kwarg is rejected by non-reasoning models like the `gpt-4o` default, so `predictive_state_agent`, `predictive_manual_graph` and `predictive_tool_graph` now use the page's literals verbatim and need an OpenAI key with `gpt-6-luna` access.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
