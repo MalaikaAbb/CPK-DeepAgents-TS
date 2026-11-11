@@ -174,6 +174,14 @@ export const NAV: NavGroup[] = [
         status: "broken",
         statusNote: "Reference-only. The agent is printed only as Python (agent/a2ui_dynamic.py); the frontend and runtime snippets use undefined myCatalog / myAgent.",
       },
+      {
+        path: "/generative-ui/a2ui/fixed-schema",
+        title: "Fixed Schema A2UI",
+        docPath: "/deepagents/generative-ui/a2ui/fixed-schema",
+        summary: "A pre-written A2UI schema filled with live data by a backend tool, with button actions carrying data-model context.",
+        status: "broken",
+        statusNote: "Reference-only. The search_flights tool and agent are Python-only (main.py elided); flight_schema.json is not printed.",
+      },
     ],
   },
   {

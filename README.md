@@ -267,6 +267,9 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/generative-ui/a2ui/dynamic-schema`** — ❌ **Broken (reference-only).** `injectA2UITool: true` gives the agent `generate_a2ui`, whose secondary LLM writes schema and data; the frontend passes a catalog via `<CopilotKit a2ui={{ catalog }}>`. The agent is Python-only for Deep Agents.
 *Pass:* the page renders the callout and code.
 
+**`/generative-ui/a2ui/fixed-schema`** — ❌ **Broken (reference-only).** A backend tool loads a fixed `flight_schema.json` and returns `a2ui.render` operations; the runtime sets `injectA2UITool: false`; buttons send `action.event.context` bound to data-model paths. Tool and agent are Python-only (and `main.py` is elided), and the schema file isn't printed.
+*Pass:* the page renders the callout and code.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -295,6 +298,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [generative-ui/a2ui](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui) | `/generative-ui/a2ui` | — | ❌ Broken | Reference-only: agent side Python-only; runtime snippets use undefined `myAgent` |
 | [generative-ui/a2ui/dynamic-schema](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/dynamic-schema) | `/generative-ui/a2ui/dynamic-schema` | — | ❌ Broken | Reference-only: agent Python-only; `myCatalog` / `myAgent` undefined |
+| [generative-ui/a2ui/fixed-schema](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/fixed-schema) | `/generative-ui/a2ui/fixed-schema` | — | ❌ Broken | Reference-only: tool + agent Python-only, `main.py` elided, schema file not printed |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -589,5 +593,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 **Generative UI · A2UI**
 - [A2UI](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui) — reference-only (Python-only agent side)
 - [Dynamic Schema A2UI](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/dynamic-schema) — reference-only
+- [Fixed Schema A2UI](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/fixed-schema) — reference-only
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
