@@ -109,6 +109,16 @@ export const NAV: NavGroup[] = [
         agentId: "sample_agent",
         hasDemo: true,
       },
+      {
+        path: "/prebuilt-components/popup",
+        title: "CopilotPopup",
+        docPath: "/deepagents/prebuilt-components/popup",
+        summary: "A floating launcher that opens an overlay chat window.",
+        status: "partial",
+        statusNote: "Only the import line is published; the usage example is a missing deepagents::prebuilt-popup snippet. The demo mounts <CopilotPopup agentId=\"sample_agent\" /> (labelled, not from the page). Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
     ],
   },
   {
