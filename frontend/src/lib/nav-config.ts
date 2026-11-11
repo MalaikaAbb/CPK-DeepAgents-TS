@@ -92,6 +92,21 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    title: "Custom Look and Feel",
+    routes: [
+      {
+        path: "/custom-look-and-feel/css",
+        title: "CSS Customization",
+        docPath: "/deepagents/custom-look-and-feel/css",
+        summary: "Re-skinning the v2 chat with design-token overrides on [data-copilotkit], .copilotKit* class rules, and the labels prop.",
+        status: "partial",
+        statusNote: "Token, class/font and labels samples are mounted. The page's own theme.css walkthrough is a missing deepagents::chat-customization-css snippet, and its CopilotKitCSSProperties sample needs the v1 @copilotkit/react-ui package. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
+    ],
+  },
+  {
     title: "Rich Threads",
     routes: [
       {
