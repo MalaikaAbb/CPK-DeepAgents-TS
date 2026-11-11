@@ -239,8 +239,8 @@ Reading agent state as ordinary reactive React state.
 *Fail:* a dump with everything except `language` — the field lost its `zodState` wrapper.
 
 **`/shared-state/in-app-agent-write`** → `shared_state_agent` ⚠️
-`agent.setState` from the app, plus `agent.runAgent` to re-run immediately.
-*Try:* `Tell me a fun fact about octopuses`, hit **Toggle Language**, ask again.
+`agent.setState` from the app, plus `copilotkit.runAgent({ agent })` (from `useCopilotKit()`, was `agent.runAgent()` before the 2026-11 doc sync) to re-run immediately — the **Toggle + copilotkit.runAgent** button.
+*Try:* `Tell me a fun fact about octopuses`, hit **Toggle Language**, ask again; then hit **Toggle + copilotkit.runAgent** — a new reply starts with no typing (not yet browser-checked).
 *Pass:* the panel and JSON dump flip to `spanish` and the value survives the round trip — the write works.
 *Known limit:* **the reply stays in English.** The model never sees the value, and `exposeState` cannot reach it. Measured; see [§9 item 2](#9-known-issues--docvsimplementation-discrepancies).
 

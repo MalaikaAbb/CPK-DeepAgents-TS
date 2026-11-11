@@ -217,7 +217,7 @@ export const NAV: NavGroup[] = [
         title: "Writing agent state",
         docPath: "/deepagents/shared-state/in-app-agent-write",
         summary:
-          "Writing that same field back with agent.setState, then re-running with agent.runAgent.",
+          "Writing that same field back with agent.setState, then re-running with copilotkit.runAgent({ agent }).",
         status: "partial",
         statusNote:
           "State round-trips both ways, but the model never sees it: exposeState cannot read a field declared on another middleware.",
