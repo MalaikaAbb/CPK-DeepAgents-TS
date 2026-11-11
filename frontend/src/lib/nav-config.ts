@@ -114,6 +114,16 @@ export const NAV: NavGroup[] = [
         agentId: "sample_agent",
         hasDemo: true,
       },
+      {
+        path: "/custom-look-and-feel/markdown",
+        title: "Markdown Rendering",
+        docPath: "/deepagents/custom-look-and-feel/markdown",
+        summary: "The markdownRenderer slot: per-tag Streamdown components, a class string for the whole block, or a full replacement renderer.",
+        status: "partial",
+        statusNote: "All three samples mounted as printed; frontend-only, on sample_agent. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
     ],
   },
   {

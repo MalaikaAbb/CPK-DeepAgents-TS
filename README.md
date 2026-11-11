@@ -271,6 +271,11 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 *Pass:* each tab visibly differs from the default chat as its sample says (grey message area + blue input, custom text-only message list with `Thinking...`, dashed custom user bubble and `Copy (custom)`, plain `Copy`, dashed tool-call box, custom placeholder/welcome/disclaimer).
 *Fail:* a tab rendering the stock chat. *Gaps:* the page's welcome/assistant/disclaimer example is a missing `deepagents::chat-slots` snippet; the nested-slot components are labelled stand-ins. Not yet browser-checked.
 
+**`/custom-look-and-feel/markdown`** → `sample_agent` — ⚠️ Partial (unchecked). Three tabs: a Streamdown `components` map overriding `a` and `h2`, a `text-sm leading-7` class string, and a `PlainText` replacement renderer.
+*Try:* `Reply with a level-2 heading 'Links' and a markdown link to https://copilotkit.ai`.
+*Pass:* orange heading bar and dotted link (marker CSS is harness-only) with `target`/`rel` intact; smaller text on the class tab; raw markdown in a `<pre>` on the replace tab.
+*Fail:* stock styling on the first tab, or a `node="[object Object]"` attribute.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -299,6 +304,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [custom-look-and-feel/css](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css) | `/custom-look-and-feel/css` | `sample_agent` | ⚠️ Partial | Token / class / labels samples mounted; theme.css example missing for Deep Agents; v1 sample not mountable. Not yet browser-checked |
 | [custom-look-and-feel/slots](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots) | `/custom-look-and-feel/slots` | `sample_agent` | ⚠️ Partial | Generic samples mounted; worked example missing for Deep Agents; 3 stand-in components; 2 `@ts-expect-error`. Not yet browser-checked |
+| [custom-look-and-feel/markdown](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown) | `/custom-look-and-feel/markdown` | `sample_agent` | ⚠️ Partial | All 3 samples mounted as printed; not yet browser-checked |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -595,5 +601,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 **Custom Look and Feel**
 - [CSS Customization](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css)
 - [Slots (Subcomponents)](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots)
+- [Markdown Rendering](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown)
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
