@@ -11,7 +11,9 @@ const AGENT_ID = "sample_agent";
  *
  * Two departures, both because this is a harness rather than a one-agent app:
  * the `<details>` renderer is styled, and `agentId` is passed explicitly. The
- * page sets the agent once on the provider (`<CopilotKit agent="sample_agent">`)
+ * page sets the agent once on the provider (`<CopilotKitProvider
+ * agentId="sample_agent">` since the 2026-11 sync, `<CopilotKit agent=...>`
+ * before)
  * because it has exactly one; here ten graphs share a provider, so each route
  * names the one it wants.
  *
