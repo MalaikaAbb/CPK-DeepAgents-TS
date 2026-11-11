@@ -182,6 +182,14 @@ export const NAV: NavGroup[] = [
         status: "not-started",
         statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
       },
+      {
+        path: "/generative-ui/components/standard-catalog",
+        title: "Standard catalog",
+        docPath: "/deepagents/generative-ui/components/standard-catalog",
+        summary: "The built-in set of standard components, and how to drop, add to or replace them.",
+        status: "not-started",
+        statusNote: "Blocked on a CopilotKit upgrade: needs @copilotkit/react-core/v2/generative-ui (absent ≤1.79, present by 1.83); this repo locks 1.72.0. The page's React code is shown verbatim, not run.",
+      },
     ],
   },
   {
