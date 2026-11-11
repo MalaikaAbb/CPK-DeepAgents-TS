@@ -267,6 +267,9 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/human-in-the-loop/useInterrupt`** — ❌ **Broken (reference-only).** `useInterrupt` renders a component when a run ends with `outcome.type === "interrupt"` and resumes it with `resolve(payload, id?)` / `cancel(id?)`. The rendered Deep Agents page says it is "Not available on this framework" and prints no backend; its three frontend snippets are shown. The claim contradicts `/generative-ui/your-components/interrupt-based`, which works.
 *Pass:* the page renders the banner callout and code.
 
+**`/human-in-the-loop/headless`** — ❌ **Broken (reference-only).** Resolving interrupts from plain UI via `agent.subscribe` + `copilotkit.runAgent` instead of a `useInterrupt` render slot. The rendered Deep Agents page says "Not available on this framework" and prints no code.
+*Pass:* the banner callout renders.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -295,6 +298,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [human-in-the-loop/index](https://docs.copilotkit.ai/deepagents/human-in-the-loop/index) | `/human-in-the-loop/index` | — | ❌ Broken | Reference-only: `deepagents::hitl-in-chat` snippets missing |
 | [human-in-the-loop/useInterrupt](https://docs.copilotkit.ai/deepagents/human-in-the-loop/useInterrupt) | `/human-in-the-loop/useInterrupt` | — | ❌ Broken | Reference-only: page says "Not available on this framework" (contradicted by the working interrupt-based route); no Deep Agents backend |
+| [human-in-the-loop/headless](https://docs.copilotkit.ai/deepagents/human-in-the-loop/headless) | `/human-in-the-loop/headless` | — | ❌ Broken | Reference-only: page says "Not available on this framework"; no code printed |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -589,5 +593,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 **Human-in-the-loop**
 - [HITL Overview](https://docs.copilotkit.ai/deepagents/human-in-the-loop/index) — reference-only
 - [Pausing the Agent for Input](https://docs.copilotkit.ai/deepagents/human-in-the-loop/useInterrupt) — reference-only
+- [Headless Interrupts](https://docs.copilotkit.ai/deepagents/human-in-the-loop/headless) — reference-only
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.

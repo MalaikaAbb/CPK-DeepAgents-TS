@@ -210,6 +210,14 @@ export const NAV: NavGroup[] = [
         status: "broken",
         statusNote: "Reference-only. The rendered page says 'Not available on this framework' (contradicted by this repo's working Interrupt-based HITL route) and publishes no Deep Agents backend; its frontend snippets are shown, not mounted.",
       },
+      {
+        path: "/human-in-the-loop/headless",
+        title: "Headless Interrupts",
+        docPath: "/deepagents/human-in-the-loop/headless",
+        summary: "Resolving agent interrupts from any UI by subscribing to the agent and resuming with copilotkit.runAgent, without a useInterrupt slot.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered page says 'Not available on this framework' and prints no code for Deep Agents.",
+      },
     ],
   },
   {
