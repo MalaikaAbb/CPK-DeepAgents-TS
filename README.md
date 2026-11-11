@@ -262,6 +262,9 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/prebuilt-components/chat`** → `sample_agent` — ⚠️ Partial. The base inline chat surface, sized by its container. The rendered Deep Agents page prints only `import { CopilotKit, CopilotChat } from "@copilotkit/react-core/v2"` and the stylesheet; its usage example is a missing `deepagents::agentic-chat` ×2 snippet, so the demo mounts `<CopilotChat agentId="sample_agent" />` with nothing else (labelled).
 *Try:* `What's the weather in Lisbon?` *Pass:* a streamed reply saying Lisbon is sunny. *Fail:* no reply — check `/quickstart`. Not yet browser-checked.
 
+**`/prebuilt-components/sidebar`** → `sample_agent` — ⚠️ Partial. A collapsible chat docked beside the main content, opened by a launcher. The rendered Deep Agents page prints only `import { CopilotKit, CopilotSidebar } from "@copilotkit/react-core/v2"` and the stylesheet; its usage example is a missing `deepagents::prebuilt-sidebar` ×2 snippet, so the demo mounts `<CopilotSidebar agentId="sample_agent" />` with nothing else (labelled).
+*Try:* `What's the weather in Lisbon?` *Pass:* a streamed reply saying Lisbon is sunny. *Fail:* no reply — check `/quickstart`. Not yet browser-checked.
+
 ---
 
 ## 8. Testing checklist / current status
@@ -289,6 +292,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [prebuilt-components/chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat) | `/prebuilt-components/chat` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::agentic-chat` ×2 snippet; minimal labelled mount |
+| [prebuilt-components/sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) | `/prebuilt-components/sidebar` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::prebuilt-sidebar` ×2 snippet; minimal labelled mount |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -582,5 +586,6 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 
 **Basics · Prebuilt Components**
 - [CopilotChat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat) — import line only for Deep Agents
+- [CopilotSidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) — import line only for Deep Agents
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.

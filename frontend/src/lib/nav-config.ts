@@ -99,6 +99,16 @@ export const NAV: NavGroup[] = [
         agentId: "sample_agent",
         hasDemo: true,
       },
+      {
+        path: "/prebuilt-components/sidebar",
+        title: "CopilotSidebar",
+        docPath: "/deepagents/prebuilt-components/sidebar",
+        summary: "A collapsible chat docked beside the main content, opened by a launcher.",
+        status: "partial",
+        statusNote: "Only the import line is published; the usage example is a missing deepagents::prebuilt-sidebar ×2 snippet. The demo mounts <CopilotSidebar agentId=\"sample_agent\" /> (labelled, not from the page). Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
     ],
   },
   {
