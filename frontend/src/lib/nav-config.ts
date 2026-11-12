@@ -289,6 +289,19 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    title: "Agent capabilities",
+    routes: [
+      {
+        path: "/multi-agent/subagents",
+        title: "Sub-agents",
+        docPath: "/deepagents/multi-agent/subagents",
+        summary: "A supervisor delegating to specialised sub-agents exposed as tools, with a live delegation log rendered from shared state.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered Deep Agents page shows 'Missing snippet — No demo found for deepagents::subagents' in all three code cells (sub-agents, supervisor tools, delegation log), so there is no agent, tool or component to build.",
+      },
+    ],
+  },
+  {
     title: "Intelligence",
     routes: [
       {
