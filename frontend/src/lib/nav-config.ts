@@ -92,6 +92,37 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    title: "Chat",
+    routes: [
+      {
+        path: "/multimodal-attachments",
+        title: "Multimodal Attachments",
+        docPath: "/deepagents/multimodal-attachments",
+        summary: "CopilotChat's attachments prop: drag-and-drop files, MIME/size limits, custom onUpload (data or URL), upload concurrency and error hooks.",
+        status: "partial",
+        statusNote: "Frontend-only page, run against sample_agent. Three tabs fail on upload by design: the page uses uploadToStorage, toast and an /api/upload route it never defines. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
+      {
+        path: "/voice",
+        title: "Voice",
+        docPath: "/deepagents/voice",
+        summary: "Speech-to-text in the chat composer: a runtime transcriptionService makes /info advertise transcription, and CopilotChat grows a mic button.",
+        status: "broken",
+        statusNote: "Reference-only. All four code cells on the rendered Deep Agents page are 'No demo found for deepagents::voice' — no page, route or transcription service is published.",
+      },
+      {
+        path: "/generative-ui/reasoning",
+        title: "Reasoning",
+        docPath: "/deepagents/generative-ui/reasoning",
+        summary: "Reasoning tokens rendered in the chat: the built-in Thinking card, or a custom messageView.reasoningMessage slot.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered Deep Agents page shows 'No demo found' for deepagents::reasoning-default and deepagents::reasoning-custom in every code cell, and no reasoning agent is published.",
+      },
+    ],
+  },
+  {
     title: "Rich Threads",
     routes: [
       {

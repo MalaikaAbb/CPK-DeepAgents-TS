@@ -259,6 +259,18 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Chat
+
+**`/multimodal-attachments`** → `sample_agent` — ⚠️ Partial. Every `attachments={...}` sample on the page as its own tab: quick start, `accept` + `maxSize`, `onUpload` returning base64 `data`, `onUpload` POSTing to `/api/upload` for a URL, `maxConcurrentUploads`, `onUploadFailed`, and `onError`. The page's `agentId="my-agent"` becomes `sample_agent`.
+*Try:* on **Quick start**, attach a PNG and ask `What is in this image?`; on **accept + maxSize**, attach a `.zip`.
+*Pass:* a thumbnail chip before sending and a reply describing the image; the `.zip` is refused before upload.
+*Fail:* a `RUN_ERROR` after sending an image. *Expected failures:* the three ✗ tabs — `/api/upload` has no handler (404), `uploadToStorage` and `toast` are undefined (ReferenceError). Not yet browser-checked.
+
+**`/voice`** — ❌ **Broken (reference-only).** The page explains that a `transcriptionService` on the v2 runtime makes `/info` report `audioFileTranscriptionEnabled`, which makes `CopilotChat` render a mic that POSTs audio to `/transcribe`. On the rendered Deep Agents page all four code cells are missing `deepagents::voice` snippets, so nothing is mounted; this runtime has no transcription service and no chat here shows a mic.
+*Pass:* the gap panel renders.
+
+**`/generative-ui/reasoning`** — ❌ **Broken (reference-only).** Models that stream reasoning produce `REASONING_MESSAGE_*` events that `CopilotChat` renders as a built-in "Thinking…" card, or through a custom `messageView.reasoningMessage` slot. Every code cell on the rendered Deep Agents page is a missing `deepagents::reasoning-default` / `deepagents::reasoning-custom` snippet, so nothing is mounted.
+*Pass:* the gap panel renders.
 ### Agent capabilities
 
 **`/multi-agent/subagents`** — ❌ **Broken (reference-only).** The page teaches a supervisor that delegates to research / writing / critique sub-agents exposed as tools, logging each delegation into a shared `delegations` state slot that the UI renders live. On the rendered Deep Agents page all three code cells are "Missing snippet — No demo found for `deepagents::subagents`", so there is nothing to run: the route explains the pattern, lists the missing cells, and shows the two inline fragments the prose does print (`useAgent({ updates: [...] })`, `agent.state.delegations`).
@@ -290,6 +302,9 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) | `/multimodal-attachments` | `sample_agent` | ⚠️ Partial | Frontend-only; 3 of 7 tabs use undefined helpers (`uploadToStorage`, `toast`, `/api/upload`). Not yet browser-checked |
+| [voice](https://docs.copilotkit.ai/deepagents/voice) | `/voice` | — | ❌ Broken | Reference-only: all 4 code cells are missing `deepagents::voice` snippets |
+| [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) | `/generative-ui/reasoning` | — | ❌ Broken | Reference-only: all code cells are missing `deepagents::reasoning-*` snippets |
 | [multi-agent/subagents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) | `/multi-agent/subagents` | — | ❌ Broken | Reference-only: every code cell on the rendered page is a missing `deepagents::subagents` snippet |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
@@ -368,6 +383,11 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 ### 2026-11 doc sync: new pages
 
+**N2. Multimodal Attachments uses helpers it never defines.** [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) calls `uploadToStorage(file)` (metadata and concurrency samples), reads `currentUser.id` (metadata), calls `toast.error` with no import (`onUploadFailed`), and POSTs to an `/api/upload` route it never publishes (URL sample). Kept as printed; `@ts-expect-error` on the two undefined names. Those tabs fail at upload time. The page's first sample also targets `agentId="my-agent"`. Its `onError={(event) => console.error(`[${event.code}]`, event.error.message)}` sample fails `tsc` at react-core 1.72 (TS2339: `code` / `error` don't exist on the event union); kept with `@ts-expect-error`.
+
+**N3. Voice publishes no Deep Agents code.** [voice](https://docs.copilotkit.ai/deepagents/voice) renders four "No demo found for `deepagents::voice`" boxes (frontend page, sample-audio button, `/api/copilotkit-voice` runtime route, transcription service). The `.md` fallback imports an unpublished `@/lib/transcription-service` and `VoiceChat`. Reference-only, ❌ Broken.
+
+**N4. Reasoning publishes no Deep Agents code.** [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) renders "No demo found" for `deepagents::reasoning-default` (1 cell) and `deepagents::reasoning-custom` (2 cells), and publishes no agent that emits reasoning. The `.md` fallback also calls unpublished `useReasoning*Suggestions` hooks and a `ReasoningBlock` component. Reference-only, ❌ Broken.
 **N1. Sub-agents publishes no Deep Agents code.** [multi-agent/subagents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) renders "Missing snippet — No demo found for `deepagents::subagents`" in all three code cells (sub-agent setup, supervisor tools, delegation-log component). The `.md` export's fallback is LangGraph Python (`create_agent`, `HeaderForwardingMiddleware` from an unpublished `src.agents._header_forwarding_middleware`) and a showcase `DelegationLog` that uses undefined `SUB_AGENT_STYLE`, `SubAgentName` and `DelegationLogProps`. Nothing was written in their place; `/multi-agent/subagents` is reference-only, ❌ Broken. The page's own callout also warns that the fallback's `operator.add` reducer doubles the log on continued threads.
 
 ### Where the TypeScript tabs are *better* than the Python ones
@@ -583,6 +603,10 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
 
+**Chat**
+- [Multimodal Attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments)
+- [Voice](https://docs.copilotkit.ai/deepagents/voice) — reference-only, no Deep Agents snippet published
+- [Reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) — reference-only, no Deep Agents snippet published
 **Agent capabilities**
 - [Sub-agents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) — reference-only, no Deep Agents snippet published
 
