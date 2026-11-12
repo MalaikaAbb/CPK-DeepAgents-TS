@@ -259,6 +259,29 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Custom Look and Feel
+
+**`/custom-look-and-feel/css`** → `sample_agent` — ⚠️ Partial. Three tabs: the page's `[data-copilotkit]` v2 token overrides, its `.copilotKit*` class and font rules, and `CopilotChat labels={...}`. The CSS is injected only while its tab is mounted instead of into `globals.css`, so it doesn't restyle the rest of the harness.
+*Try:* send `hi` on each tab.
+*Pass:* indigo accents and the 0.625rem radius on the token tab; blue user bubbles and padded message list on the class tab; the custom welcome text and placeholder on the labels tab.
+*Fail:* a tab identical to the default chat. *Not mounted:* the v1 `CopilotKitCSSProperties` sample (`@copilotkit/react-ui` not installed) and the page's `theme.css` example (missing `deepagents::chat-customization-css` snippet). Not yet browser-checked.
+
+**`/custom-look-and-feel/slots`** → `sample_agent` — ⚠️ Partial. One tab per sample: Tailwind class strings, props override, a custom `messageView` component, nested slots, a three-levels-deep `copyButton`, a wrapped `toolCallsView`, and `labels`.
+*Try:* `hi` on each tab; on **toolCallsView**, `What's the weather in Paris?`.
+*Pass:* each tab visibly differs from the default chat as its sample says (grey message area + blue input, custom text-only message list with `Thinking...`, dashed custom user bubble and `Copy (custom)`, plain `Copy`, dashed tool-call box, custom placeholder/welcome/disclaimer).
+*Fail:* a tab rendering the stock chat. *Gaps:* the page's welcome/assistant/disclaimer example is a missing `deepagents::chat-slots` snippet; the nested-slot components are labelled stand-ins. Not yet browser-checked.
+
+**`/custom-look-and-feel/markdown`** → `sample_agent` — ⚠️ Partial (unchecked). Three tabs: a Streamdown `components` map overriding `a` and `h2`, a `text-sm leading-7` class string, and a `PlainText` replacement renderer.
+*Try:* `Reply with a level-2 heading 'Links' and a markdown link to https://copilotkit.ai`.
+*Pass:* orange heading bar and dotted link (marker CSS is harness-only) with `target`/`rel` intact; smaller text on the class tab; raw markdown in a `<pre>` on the replace tab.
+*Fail:* stock styling on the first tab, or a `node="[object Object]"` attribute.
+
+**`/custom-look-and-feel/headless-ui`** — ❌ **Broken (reference-only).** The page describes a chat with no `CopilotChat`: `useAgent` for messages, `useCopilotKit().copilotkit.runAgent` to send, `useRenderToolCall` for tool calls, and a complete version that re-creates `CopilotChatMessageView` with `useRenderActivityMessage` and `useRenderCustomMessages`. All five code cells are missing `deepagents::headless-*` snippets (the `.md` fences are empty too).
+*Pass:* the gap panel renders.
+
+**`/custom-look-and-feel/reasoning-messages`** → `sample_agent` — ❌ Broken. The page's `CustomHeader`, `CustomContent` and `MyReasoningLayout` are mounted in four tabs on `messageView.reasoningMessage`. The agent that streams reasoning (`deepagents::reasoning-default` / `reasoning-custom`) is not published, so the slots run on `sample_agent`, which emits none.
+*Try:* `Think step by step: what is 17 × 23?`
+*Expected here:* a normal reply and no reasoning card. *Pass with a reasoning agent:* 🧠/💡 header, monospace content with a cursor, yellow card on the layout tab.
 ### Chat
 
 **`/multimodal-attachments`** → `sample_agent` — ⚠️ Partial. Every `attachments={...}` sample on the page as its own tab: quick start, `accept` + `maxSize`, `onUpload` returning base64 `data`, `onUpload` POSTing to `/api/upload` for a URL, `maxConcurrentUploads`, `onUploadFailed`, and `onError`. The page's `agentId="my-agent"` becomes `sample_agent`.
@@ -302,6 +325,11 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [custom-look-and-feel/css](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css) | `/custom-look-and-feel/css` | `sample_agent` | ⚠️ Partial | Token / class / labels samples mounted; theme.css example missing for Deep Agents; v1 sample not mountable. Not yet browser-checked |
+| [custom-look-and-feel/slots](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots) | `/custom-look-and-feel/slots` | `sample_agent` | ⚠️ Partial | Generic samples mounted; worked example missing for Deep Agents; 3 stand-in components; 2 `@ts-expect-error`. Not yet browser-checked |
+| [custom-look-and-feel/markdown](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown) | `/custom-look-and-feel/markdown` | `sample_agent` | ⚠️ Partial | All 3 samples mounted as printed; not yet browser-checked |
+| [custom-look-and-feel/headless-ui](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) | `/custom-look-and-feel/headless-ui` | — | ❌ Broken | Reference-only: all 5 code cells missing (`deepagents::headless-simple`, `headless-complete`); `.md` fences empty |
+| [custom-look-and-feel/reasoning-messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages) | `/custom-look-and-feel/reasoning-messages` | `sample_agent` | ❌ Broken | Slot code mounted; the reasoning agent is a missing `deepagents::reasoning-*` snippet, so no card can appear |
 | [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) | `/multimodal-attachments` | `sample_agent` | ⚠️ Partial | Frontend-only; 3 of 7 tabs use undefined helpers (`uploadToStorage`, `toast`, `/api/upload`). Not yet browser-checked |
 | [voice](https://docs.copilotkit.ai/deepagents/voice) | `/voice` | — | ❌ Broken | Reference-only: all 4 code cells are missing `deepagents::voice` snippets |
 | [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) | `/generative-ui/reasoning` | — | ❌ Broken | Reference-only: all code cells are missing `deepagents::reasoning-*` snippets |
@@ -603,6 +631,12 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
 
+**Custom Look and Feel**
+- [CSS Customization](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css)
+- [Slots (Subcomponents)](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots)
+- [Markdown Rendering](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown)
+- [Headless UI](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) — reference-only, no snippet published
+- [Reasoning Messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages)
 **Chat**
 - [Multimodal Attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments)
 - [Voice](https://docs.copilotkit.ai/deepagents/voice) — reference-only, no Deep Agents snippet published

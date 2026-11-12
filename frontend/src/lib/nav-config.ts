@@ -92,6 +92,15 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    title: "Custom Look and Feel",
+    routes: [
+      {
+        path: "/custom-look-and-feel/css",
+        title: "CSS Customization",
+        docPath: "/deepagents/custom-look-and-feel/css",
+        summary: "Re-skinning the v2 chat with design-token overrides on [data-copilotkit], .copilotKit* class rules, and the labels prop.",
+        status: "partial",
+        statusNote: "Token, class/font and labels samples are mounted. The page's own theme.css walkthrough is a missing deepagents::chat-customization-css snippet, and its CopilotKitCSSProperties sample needs the v1 @copilotkit/react-ui package. Not yet browser-checked.",
     title: "Chat",
     routes: [
       {
@@ -105,6 +114,42 @@ export const NAV: NavGroup[] = [
         hasDemo: true,
       },
       {
+        path: "/custom-look-and-feel/slots",
+        title: "Slots (Subcomponents)",
+        docPath: "/deepagents/custom-look-and-feel/slots",
+        summary: "CopilotChat slots three ways — Tailwind class string, props object, or replacement component — including nested slots and labels.",
+        status: "partial",
+        statusNote: "All seven generic samples mounted. The page's worked example is a missing deepagents::chat-slots snippet; CustomToolbar/CustomCopyButton/CustomUserMessage are labelled stand-ins; two samples need @ts-expect-error. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
+      {
+        path: "/custom-look-and-feel/markdown",
+        title: "Markdown Rendering",
+        docPath: "/deepagents/custom-look-and-feel/markdown",
+        summary: "The markdownRenderer slot: per-tag Streamdown components, a class string for the whole block, or a full replacement renderer.",
+        status: "partial",
+        statusNote: "All three samples mounted as printed; frontend-only, on sample_agent. Not yet browser-checked.",
+        agentId: "sample_agent",
+        hasDemo: true,
+      },
+      {
+        path: "/custom-look-and-feel/headless-ui",
+        title: "Headless UI",
+        docPath: "/deepagents/custom-look-and-feel/headless-ui",
+        summary: "A chat built from useAgent, useCopilotKit and useRenderToolCall with no CopilotChat, up to a full hand-rolled message view.",
+        status: "broken",
+        statusNote: "Reference-only. Every code cell is a missing deepagents::headless-simple / headless-complete snippet, and the .md export's fences are empty, so there is no code to build from.",
+      },
+      {
+        path: "/custom-look-and-feel/reasoning-messages",
+        title: "Reasoning Messages",
+        docPath: "/deepagents/custom-look-and-feel/reasoning-messages",
+        summary: "Overriding the reasoning card's header, contentView and toggle slots, or its whole layout via a children render function.",
+        status: "broken",
+        statusNote: "The page's slot components are mounted, but the reasoning agent they need is a missing deepagents::reasoning-* snippet; on sample_agent (gpt-4o) no reasoning card ever appears.",
+        agentId: "sample_agent",
+        hasDemo: true,
         path: "/voice",
         title: "Voice",
         docPath: "/deepagents/voice",
