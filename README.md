@@ -259,6 +259,11 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Agent capabilities
+
+**`/multi-agent/subagents`** — ❌ **Broken (reference-only).** The page teaches a supervisor that delegates to research / writing / critique sub-agents exposed as tools, logging each delegation into a shared `delegations` state slot that the UI renders live. On the rendered Deep Agents page all three code cells are "Missing snippet — No demo found for `deepagents::subagents`", so there is nothing to run: the route explains the pattern, lists the missing cells, and shows the two inline fragments the prose does print (`useAgent({ updates: [...] })`, `agent.state.delegations`).
+*Pass:* the page renders the gap panel. *There is no live demo to fail.*
+
 ---
 
 ## 8. Testing checklist / current status
@@ -285,8 +290,10 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [multi-agent/subagents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) | `/multi-agent/subagents` | — | ❌ Broken | Reference-only: every code cell on the rendered page is a missing `deepagents::subagents` snippet |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
+**2026-11 doc sync (Agent capabilities):** +1 ❌ Broken (Sub-agents, reference-only).
 
 **Tracked without a demo.** The three 🚧 rows carry a route, a nav entry and a snapshot so drift is watched, but nothing is implemented behind them and the recorder does not touch them. The reason is on each route’s page and in §7. The rest of `/deepagents/intelligence/` is the old `/deepagents/premium/` set under a new prefix and stays in `doc-snapshot/manifest.json`’s `knownUnmapped` list.
 
@@ -358,6 +365,10 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+
+### 2026-11 doc sync: new pages
+
+**N1. Sub-agents publishes no Deep Agents code.** [multi-agent/subagents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) renders "Missing snippet — No demo found for `deepagents::subagents`" in all three code cells (sub-agent setup, supervisor tools, delegation-log component). The `.md` export's fallback is LangGraph Python (`create_agent`, `HeaderForwardingMiddleware` from an unpublished `src.agents._header_forwarding_middleware`) and a showcase `DelegationLog` that uses undefined `SUB_AGENT_STYLE`, `SubAgentName` and `DelegationLogProps`. Nothing was written in their place; `/multi-agent/subagents` is reference-only, ❌ Broken. The page's own callout also warns that the fallback's `operator.add` reducer doubles the log on continued threads.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -571,5 +582,8 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Predictive State Updates — custom graph, tool emission](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates?agent-type=custom-graph&state-emission=tool-emission)
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
+
+**Agent capabilities**
+- [Sub-agents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) — reference-only, no Deep Agents snippet published
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
