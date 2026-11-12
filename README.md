@@ -282,6 +282,22 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/custom-look-and-feel/reasoning-messages`** → `sample_agent` — ❌ Broken. The page's `CustomHeader`, `CustomContent` and `MyReasoningLayout` are mounted in four tabs on `messageView.reasoningMessage`. The agent that streams reasoning (`deepagents::reasoning-default` / `reasoning-custom`) is not published, so the slots run on `sample_agent`, which emits none.
 *Try:* `Think step by step: what is 17 × 23?`
 *Expected here:* a normal reply and no reasoning card. *Pass with a reasoning agent:* 🧠/💡 header, monospace content with a cursor, yellow card on the layout tab.
+### Chat
+
+**`/multimodal-attachments`** → `sample_agent` — ⚠️ Partial. Every `attachments={...}` sample on the page as its own tab: quick start, `accept` + `maxSize`, `onUpload` returning base64 `data`, `onUpload` POSTing to `/api/upload` for a URL, `maxConcurrentUploads`, `onUploadFailed`, and `onError`. The page's `agentId="my-agent"` becomes `sample_agent`.
+*Try:* on **Quick start**, attach a PNG and ask `What is in this image?`; on **accept + maxSize**, attach a `.zip`.
+*Pass:* a thumbnail chip before sending and a reply describing the image; the `.zip` is refused before upload.
+*Fail:* a `RUN_ERROR` after sending an image. *Expected failures:* the three ✗ tabs — `/api/upload` has no handler (404), `uploadToStorage` and `toast` are undefined (ReferenceError). Not yet browser-checked.
+
+**`/voice`** — ❌ **Broken (reference-only).** The page explains that a `transcriptionService` on the v2 runtime makes `/info` report `audioFileTranscriptionEnabled`, which makes `CopilotChat` render a mic that POSTs audio to `/transcribe`. On the rendered Deep Agents page all four code cells are missing `deepagents::voice` snippets, so nothing is mounted; this runtime has no transcription service and no chat here shows a mic.
+*Pass:* the gap panel renders.
+
+**`/generative-ui/reasoning`** — ❌ **Broken (reference-only).** Models that stream reasoning produce `REASONING_MESSAGE_*` events that `CopilotChat` renders as a built-in "Thinking…" card, or through a custom `messageView.reasoningMessage` slot. Every code cell on the rendered Deep Agents page is a missing `deepagents::reasoning-default` / `deepagents::reasoning-custom` snippet, so nothing is mounted.
+*Pass:* the gap panel renders.
+### Agent capabilities
+
+**`/multi-agent/subagents`** — ❌ **Broken (reference-only).** The page teaches a supervisor that delegates to research / writing / critique sub-agents exposed as tools, logging each delegation into a shared `delegations` state slot that the UI renders live. On the rendered Deep Agents page all three code cells are "Missing snippet — No demo found for `deepagents::subagents`", so there is nothing to run: the route explains the pattern, lists the missing cells, and shows the two inline fragments the prose does print (`useAgent({ updates: [...] })`, `agent.state.delegations`).
+*Pass:* the page renders the gap panel. *There is no live demo to fail.*
 
 ---
 
@@ -314,8 +330,13 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [custom-look-and-feel/markdown](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown) | `/custom-look-and-feel/markdown` | `sample_agent` | ⚠️ Partial | All 3 samples mounted as printed; not yet browser-checked |
 | [custom-look-and-feel/headless-ui](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) | `/custom-look-and-feel/headless-ui` | — | ❌ Broken | Reference-only: all 5 code cells missing (`deepagents::headless-simple`, `headless-complete`); `.md` fences empty |
 | [custom-look-and-feel/reasoning-messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages) | `/custom-look-and-feel/reasoning-messages` | `sample_agent` | ❌ Broken | Slot code mounted; the reasoning agent is a missing `deepagents::reasoning-*` snippet, so no card can appear |
+| [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) | `/multimodal-attachments` | `sample_agent` | ⚠️ Partial | Frontend-only; 3 of 7 tabs use undefined helpers (`uploadToStorage`, `toast`, `/api/upload`). Not yet browser-checked |
+| [voice](https://docs.copilotkit.ai/deepagents/voice) | `/voice` | — | ❌ Broken | Reference-only: all 4 code cells are missing `deepagents::voice` snippets |
+| [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) | `/generative-ui/reasoning` | — | ❌ Broken | Reference-only: all code cells are missing `deepagents::reasoning-*` snippets |
+| [multi-agent/subagents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) | `/multi-agent/subagents` | — | ❌ Broken | Reference-only: every code cell on the rendered page is a missing `deepagents::subagents` snippet |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
+**2026-11 doc sync (Agent capabilities):** +1 ❌ Broken (Sub-agents, reference-only).
 
 **Tracked without a demo.** The three 🚧 rows carry a route, a nav entry and a snapshot so drift is watched, but nothing is implemented behind them and the recorder does not touch them. The reason is on each route’s page and in §7. The rest of `/deepagents/intelligence/` is the old `/deepagents/premium/` set under a new prefix and stays in `doc-snapshot/manifest.json`’s `knownUnmapped` list.
 
@@ -390,13 +411,12 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 ### 2026-11 doc sync: new pages
 
-**N5. CSS Customization mixes v1 and v2, and its worked example is missing.** [custom-look-and-feel/css](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css) renders three "No demo found for `deepagents::chat-customization-css`" boxes where its scoped `theme.css` example should be. Its inline-variable sample imports `CopilotKitCSSProperties` from `@copilotkit/react-ui` (the deprecated v1 package) and sets `--copilot-kit-primary-color`, which the page itself says only styles v1 components; not mountable in this v2-only harness, so it is shown, not run.
+**N2. Multimodal Attachments uses helpers it never defines.** [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) calls `uploadToStorage(file)` (metadata and concurrency samples), reads `currentUser.id` (metadata), calls `toast.error` with no import (`onUploadFailed`), and POSTs to an `/api/upload` route it never publishes (URL sample). Kept as printed; `@ts-expect-error` on the two undefined names. Those tabs fail at upload time. The page's first sample also targets `agentId="my-agent"`. Its `onError={(event) => console.error(`[${event.code}]`, event.error.message)}` sample fails `tsc` at react-core 1.72 (TS2339: `code` / `error` don't exist on the event union); kept with `@ts-expect-error`.
 
-**N6. Slots: undefined components and slot typing.** [custom-look-and-feel/slots](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots) renders three missing `deepagents::chat-slots` snippets for its worked example. Its Nested Slots sample uses `CustomToolbar`, `CustomCopyButton` and `CustomUserMessage` without defining them (minimal labelled stand-ins added). Two samples fail `tsc` at @copilotkit/react-core 1.72 and are kept with `@ts-expect-error`: the custom `messageView` component destructures untyped props (TS7031, and TS7006 on its `msg` callback), and a plain function component is not assignable to `messageView` / `userMessage`, whose slot type is the default component's `typeof` including its static sub-components (TS2322). tsc also rejects the props-override sample's `"data-testid"` key on `messageView` (TS2353, excess property); kept verbatim with `@ts-expect-error`.
+**N3. Voice publishes no Deep Agents code.** [voice](https://docs.copilotkit.ai/deepagents/voice) renders four "No demo found for `deepagents::voice`" boxes (frontend page, sample-audio button, `/api/copilotkit-voice` runtime route, transcription service). The `.md` fallback imports an unpublished `@/lib/transcription-service` and `VoiceChat`. Reference-only, ❌ Broken.
 
-**N7. Headless UI publishes no code at all.** [custom-look-and-feel/headless-ui](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) renders "No demo found" for `deepagents::headless-simple` and `deepagents::headless-complete` (×4), and the `.md` export's code fences for those cells are empty, so no framework's version is published. Reference-only, ❌ Broken.
-
-**N8. Reasoning Messages has slots but no reasoning source.** [custom-look-and-feel/reasoning-messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages) prints the slot components but its demo agents are missing `deepagents::reasoning-default` / `deepagents::reasoning-custom` snippets. Mounted on `sample_agent` (no reasoning), so nothing renders; ❌ Broken. Also, `reasoningMessage: MyReasoningLayout` does not typecheck at react-core 1.72: the slot is typed `typeof CopilotChatReasoningMessage`, including its static `Header`/`Content`/`Toggle`, so a plain function component is rejected (TS2322); kept with `@ts-expect-error`.
+**N4. Reasoning publishes no Deep Agents code.** [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) renders "No demo found" for `deepagents::reasoning-default` (1 cell) and `deepagents::reasoning-custom` (2 cells), and publishes no agent that emits reasoning. The `.md` fallback also calls unpublished `useReasoning*Suggestions` hooks and a `ReasoningBlock` component. Reference-only, ❌ Broken.
+**N1. Sub-agents publishes no Deep Agents code.** [multi-agent/subagents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) renders "Missing snippet — No demo found for `deepagents::subagents`" in all three code cells (sub-agent setup, supervisor tools, delegation-log component). The `.md` export's fallback is LangGraph Python (`create_agent`, `HeaderForwardingMiddleware` from an unpublished `src.agents._header_forwarding_middleware`) and a showcase `DelegationLog` that uses undefined `SUB_AGENT_STYLE`, `SubAgentName` and `DelegationLogProps`. Nothing was written in their place; `/multi-agent/subagents` is reference-only, ❌ Broken. The page's own callout also warns that the fallback's `operator.add` reducer doubles the log on continued threads.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -617,5 +637,11 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Markdown Rendering](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown)
 - [Headless UI](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) — reference-only, no snippet published
 - [Reasoning Messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages)
+**Chat**
+- [Multimodal Attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments)
+- [Voice](https://docs.copilotkit.ai/deepagents/voice) — reference-only, no Deep Agents snippet published
+- [Reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) — reference-only, no Deep Agents snippet published
+**Agent capabilities**
+- [Sub-agents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) — reference-only, no Deep Agents snippet published
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
