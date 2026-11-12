@@ -259,6 +259,13 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Generative UI · Declarative
+
+**`/generative-ui/json-render`** — ❌ **Broken (reference-only).** The agent replies with a `{ root, elements }` spec and a custom `messageView.assistantMessage` renders it via `@json-render/react`. For Deep Agents the rendered page prints only the example agent output; the renderer, catalog, registry and agent are not published (the demo covers Built-in Agent and LangGraph only).
+*Pass:* the gap panel and example output render.
+
+**`/generative-ui/hashbrown`** — ❌ **Broken (reference-only).** A Hashbrown UI kit + `useJsonParser` renders the agent's streamed `{ ui: [...] }` envelope as dashboard components. Only the example envelope is printed for Deep Agents.
+*Pass:* the gap panel and example output render.
 ### Generative UI · Controlled
 
 **`/generative-ui/tool-based`** — ❌ **Broken (reference-only).** `useComponent` registers a React component as a frontend tool; `copilotkitMiddleware` forwards it to the model, and a tool call renders the component inline. On the rendered Deep Agents page the `useComponent({ name: "render_bar_chart", ... })` call is a missing `deepagents::gen-ui-tool-based` snippet (no `barChartPropsSchema`, no `BarChart`), and the agent + system prompt are Python-only. The route shows everything the page does print.
@@ -343,6 +350,8 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [generative-ui/json-render](https://docs.copilotkit.ai/deepagents/generative-ui/json-render) | `/generative-ui/json-render` | — | ❌ Broken | Reference-only: only the example agent output is printed for Deep Agents |
+| [generative-ui/hashbrown](https://docs.copilotkit.ai/deepagents/generative-ui/hashbrown) | `/generative-ui/hashbrown` | — | ❌ Broken | Reference-only: only the example agent envelope is printed for Deep Agents |
 | [generative-ui/tool-based](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) | `/generative-ui/tool-based` | — | ❌ Broken | Reference-only: `useComponent` registration missing for Deep Agents; backend Python-only |
 | [prebuilt-components/chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat) | `/prebuilt-components/chat` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::agentic-chat` ×2 snippet; minimal labelled mount |
 | [prebuilt-components/sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) | `/prebuilt-components/sidebar` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::prebuilt-sidebar` ×2 snippet; minimal labelled mount |
@@ -434,6 +443,7 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 ### 2026-11 doc sync: new pages
 
+**N12. JSON Render and Hashbrown print no Deep Agents code.** [json-render](https://docs.copilotkit.ai/deepagents/generative-ui/json-render) and [hashbrown](https://docs.copilotkit.ai/deepagents/generative-ui/hashbrown) render only an example agent-output JSON each; their demo picker and Code tab cover Built-in Agent and LangGraph, not Deep Agents. The `.md` fallbacks are another framework's demo files importing unpublished modules (`./registry`, `./types`, `./suggestions`, chart components). Both routes are reference-only, ❌ Broken; `@json-render/*` and `@hashbrownai/*` are not installed.
 **N11. Components as Tools: no frontend registration, Python-only backend.** [generative-ui/tool-based](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) prints only the `useComponent` / `zod` imports; the registration itself is a missing `deepagents::gen-ui-tool-based` snippet, and its `barChartPropsSchema` and `BarChart` are never shown. The backend (`create_deep_agent` + `CopilotKitMiddleware` + `SYSTEM_PROMPT`) is printed only in Python. Reference-only, ❌ Broken. The headless `CopilotChatToolCallsView` fragment also uses undefined `assistantMessage` / `allMessages`.
 **N9. Prebuilt component pages print only an import.** [chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat), [sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) and [popup](https://docs.copilotkit.ai/deepagents/prebuilt-components/popup) each render the `import { CopilotKit, <Component> } ...` line and then "No demo found" for `deepagents::agentic-chat`, `deepagents::prebuilt-sidebar` and `deepagents::prebuilt-popup`. The demos mount the component with only `agentId="sample_agent"`, a prop from each page's table, labelled as not from the page.
 
@@ -658,6 +668,9 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
 
+**Generative UI · Declarative**
+- [JSON Render](https://docs.copilotkit.ai/deepagents/generative-ui/json-render) — reference-only
+- [Hashbrown](https://docs.copilotkit.ai/deepagents/generative-ui/hashbrown) — reference-only
 **Generative UI · Controlled**
 - [Components as Tools](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) — reference-only
 **Basics · Prebuilt Components**
