@@ -259,6 +259,11 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Generative UI · Controlled
+
+**`/generative-ui/tool-based`** — ❌ **Broken (reference-only).** `useComponent` registers a React component as a frontend tool; `copilotkitMiddleware` forwards it to the model, and a tool call renders the component inline. On the rendered Deep Agents page the `useComponent({ name: "render_bar_chart", ... })` call is a missing `deepagents::gen-ui-tool-based` snippet (no `barChartPropsSchema`, no `BarChart`), and the agent + system prompt are Python-only. The route shows everything the page does print.
+*Pass:* the gap panel renders.
+
 **`/prebuilt-components/chat`** → `sample_agent` — ⚠️ Partial. The base inline chat surface, sized by its container. The rendered Deep Agents page prints only `import { CopilotKit, CopilotChat } from "@copilotkit/react-core/v2"` and the stylesheet; its usage example is a missing `deepagents::agentic-chat` ×2 snippet, so the demo mounts `<CopilotChat agentId="sample_agent" />` with nothing else (labelled).
 *Try:* `What's the weather in Lisbon?` *Pass:* a streamed reply saying Lisbon is sunny. *Fail:* no reply — check `/quickstart`. Not yet browser-checked.
 
@@ -338,6 +343,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [generative-ui/tool-based](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) | `/generative-ui/tool-based` | — | ❌ Broken | Reference-only: `useComponent` registration missing for Deep Agents; backend Python-only |
 | [prebuilt-components/chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat) | `/prebuilt-components/chat` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::agentic-chat` ×2 snippet; minimal labelled mount |
 | [prebuilt-components/sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) | `/prebuilt-components/sidebar` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::prebuilt-sidebar` ×2 snippet; minimal labelled mount |
 | [prebuilt-components/popup](https://docs.copilotkit.ai/deepagents/prebuilt-components/popup) | `/prebuilt-components/popup` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::prebuilt-popup` snippet; minimal labelled mount |
@@ -428,6 +434,7 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 ### 2026-11 doc sync: new pages
 
+**N11. Components as Tools: no frontend registration, Python-only backend.** [generative-ui/tool-based](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) prints only the `useComponent` / `zod` imports; the registration itself is a missing `deepagents::gen-ui-tool-based` snippet, and its `barChartPropsSchema` and `BarChart` are never shown. The backend (`create_deep_agent` + `CopilotKitMiddleware` + `SYSTEM_PROMPT`) is printed only in Python. Reference-only, ❌ Broken. The headless `CopilotChatToolCallsView` fragment also uses undefined `assistantMessage` / `allMessages`.
 **N9. Prebuilt component pages print only an import.** [chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat), [sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) and [popup](https://docs.copilotkit.ai/deepagents/prebuilt-components/popup) each render the `import { CopilotKit, <Component> } ...` line and then "No demo found" for `deepagents::agentic-chat`, `deepagents::prebuilt-sidebar` and `deepagents::prebuilt-popup`. The demos mount the component with only `agentId="sample_agent"`, a prop from each page's table, labelled as not from the page.
 
 **N10. Chat controls' feedback sample uses an undefined `analytics`.** [prebuilt-components/chat-controls](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat-controls)'s `onThumbsUp` / `onThumbsDown` call `analytics.track(...)` with no import or definition. The route follows the aws-strands-ts harness and records each thumb into local state (a Feedback list) instead of calling it. The page's toggle sample is a lone `<button>` line reading `config`; it is wrapped in the same guard as `OpenChatButton`, and `OpenChatButton` drives a `CopilotPopup` via `open`/`onOpenChange` rather than calling `setModalOpen(true)` (both labelled in the source).
@@ -651,6 +658,8 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
 
+**Generative UI · Controlled**
+- [Components as Tools](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) — reference-only
 **Basics · Prebuilt Components**
 - [CopilotChat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat) — import line only for Deep Agents
 - [CopilotSidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) — import line only for Deep Agents
