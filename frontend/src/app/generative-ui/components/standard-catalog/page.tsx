@@ -1,28 +1,31 @@
 import { RouteHeader } from "@/components/route-header";
+import { SourceCodeGroup } from "@/components/source-code";
 import { Callout, CodeBlock, Panel } from "@/components/ui";
+
+// The page's two snippets that are not mounted, as printed.
+const USE_AS_IS = "import { standardUI } from \"@copilotkit/react-core/v2/generative-ui\";\n\n<CopilotKitProvider runtimeUrl=\"/api/copilotkit\" generativeUI={{ ui: standardUI }}>";
+const EXTEND = "import { createGenerativeUI, standardUI } from \"@copilotkit/react-core/v2/generative-ui\";\n\nexport const appUI = createGenerativeUI({\n  id: \"acme/app@1\",\n  extends: [standardUI],\n  components: {\n    ProductCard: { component: ProductCard, props: productSchema },\n  },\n});";
+
+const DIR = "frontend/src/app/generative-ui/components/standard-catalog/demo-chat";
 
 export default function Page() {
   return (
     <>
       <RouteHeader path="/generative-ui/components/standard-catalog" />
 
-      <Callout tone="warn" title="Not started: needs a CopilotKit upgrade">
+      <Callout tone="info" title="How this route is wired">
         <p>
-          Components and surfaces live in 
-          <code>@copilotkit/react-core/v2/generative-ui</code> (
-          <code>standardUI</code>, <code>createGenerativeUI</code>, 
-          <code>GenerativeUISurface</code>, …) and the provider&apos;s 
-          <code>generativeUI</code> prop. That subpath is absent up to 1.79 and present by 1.83;
-          this repo locks <code>@copilotkit/react-core</code> 
-          1.72.0, where it does not exist. Upgrading CopilotKit (and the
-          matching <code>@ag-ui/*</code> pins and lockfile) is outside this doc
-          sync, so the page&apos;s code is shown here, not run.
-        </p>
-        <p className="mt-2">
-          When it is built: the section&apos;s runtime snippet uses a TanStack 
-          <code>BuiltInAgent</code>; per this repo&apos;s rules that becomes a
-          Deep Agents graph on the LangGraph server, with the snippet&apos;s
-          prompt and no extra tools.
+          The demo runs on <code>/api/copilotkit-genui</code>
+          , the section&apos;s runtime mounted beside the main
+          one. Its agent is <code>components_agent</code>, a Deep Agents graph
+          standing in for the section&apos;s TanStack <code>BuiltInAgent</code>
+          (same prompt, no tools; <code>copilotkitMiddleware</code> hands it
+          the run&apos;s <code>render_ui</code> tool and context). Each
+          provider&apos;s <code>generativeUI</code> value is the page&apos;s;
+          only its <code>runtimeUrl</code> differs. Needs CopilotKit 1.87
+          (this repo was on 1.72.0, which has no{" "}
+          <code>v2/generative-ui</code>). What runs and what stays broken is in
+          the status note above.
         </p>
       </Callout>
 
@@ -33,9 +36,14 @@ export default function Page() {
       </Panel>
 
       <Panel title="The page's code">
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          The rendered page prints no code blocks; it is a component reference.
-        </p>
+        <div className="space-y-4">
+          <CodeBlock code={USE_AS_IS} filename="Use it as it is (mounted: the 'standardUI as is' variant)" language="tsx" />
+          <SourceCodeGroup
+            files={[{ file: `${DIR}/omit.ts` }, { file: `${DIR}/override.tsx` }]}
+            note="Drop components and Replace a component, mounted as variants. omit.ts gets the import line the snippet leaves out (labelled)."
+          />
+          <CodeBlock code={EXTEND} filename="Add your own components — broken: ProductCard and productSchema are never defined" language="ts" />
+        </div>
       </Panel>
     </>
   );
