@@ -268,10 +268,10 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/prebuilt-components/popup`** → `sample_agent` — ⚠️ Partial. A floating launcher that opens an overlay chat window. The rendered Deep Agents page prints only `import { CopilotKit, CopilotPopup } from "@copilotkit/react-core/v2"` and the stylesheet; its usage example is a missing `deepagents::prebuilt-popup` snippet, so the demo mounts `<CopilotPopup agentId="sample_agent" />` with nothing else (labelled).
 *Try:* `What's the weather in Lisbon?` *Pass:* a streamed reply saying Lisbon is sunny. *Fail:* no reply — check `/quickstart`. Not yet browser-checked.
 
-**`/prebuilt-components/chat-controls`** → `sample_agent` — ⚠️ Partial. Three tabs: the page's `Layout` (outside button driving `open`/`onOpenChange` on `CopilotSidebar`), `OpenChatButton` + the toggle line using `useCopilotChatConfiguration().setModalOpen` beside `<CopilotSidebar defaultOpen={false} />`, and `onThumbsUp`/`onThumbsDown` on the assistant-message slot.
-*Try:* click **Ask the assistant** on the first tab; on **Thumbs feedback**, say hi and click a thumb.
-*Pass:* the sidebar opens from the outside button and closes from its own toggle; thumbs appear under replies.
-*Expected failure:* clicking a thumb throws `ReferenceError: analytics is not defined` — the page never defines `analytics`. Whether the context buttons render (they sit beside, not inside, the sidebar) is itself the check of the page's "provider owns modal state" note. Not yet browser-checked.
+**`/prebuilt-components/chat-controls`** → `sample_agent` — ⚠️ Partial. One surface, laid out as in the aws-strands-ts harness: a `CopilotChatConfigurationProvider isModalDefaultOpen={false}` owns modal state; **Ask the assistant (Popup)** opens a `CopilotPopup` via `open`/`onOpenChange`; **Open/Close Sidebar** toggles a left `CopilotSidebar` through `setModalOpen`; the sidebar's `onThumbsUp`/`onThumbsDown` append to a **Feedback recorded** list.
+*Try:* "Say something I can rate." in the sidebar, then click a thumb; use both buttons.
+*Pass:* the Popup button opens the popup, the toggle's label tracks the sidebar, and each thumb appends a line with the message id. *Fail:* the buttons render nothing (outside a provider that owns modal state).
+Not yet browser-checked.
 
 ---
 
@@ -302,7 +302,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [prebuilt-components/chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat) | `/prebuilt-components/chat` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::agentic-chat` ×2 snippet; minimal labelled mount |
 | [prebuilt-components/sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) | `/prebuilt-components/sidebar` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::prebuilt-sidebar` ×2 snippet; minimal labelled mount |
 | [prebuilt-components/popup](https://docs.copilotkit.ai/deepagents/prebuilt-components/popup) | `/prebuilt-components/popup` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::prebuilt-popup` snippet; minimal labelled mount |
-| [prebuilt-components/chat-controls](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat-controls) | `/prebuilt-components/chat-controls` | `sample_agent` | ⚠️ Partial | Open/close mounted; feedback handlers call undefined `analytics`. Not yet browser-checked |
+| [prebuilt-components/chat-controls](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat-controls) | `/prebuilt-components/chat-controls` | `sample_agent` | ⚠️ Partial | Layout matches aws-strands-ts; undefined `analytics` replaced by a local Feedback list (N10). Not yet browser-checked |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
 
@@ -381,7 +381,7 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 **N9. Prebuilt component pages print only an import.** [chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat), [sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) and [popup](https://docs.copilotkit.ai/deepagents/prebuilt-components/popup) each render the `import { CopilotKit, <Component> } ...` line and then "No demo found" for `deepagents::agentic-chat`, `deepagents::prebuilt-sidebar` and `deepagents::prebuilt-popup`. The demos mount the component with only `agentId="sample_agent"`, a prop from each page's table, labelled as not from the page.
 
-**N10. Chat controls' feedback sample uses an undefined `analytics`.** [prebuilt-components/chat-controls](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat-controls)'s `onThumbsUp` / `onThumbsDown` call `analytics.track(...)` with no import or definition. Kept with `@ts-expect-error`; clicking a thumb throws ReferenceError. The page's toggle sample is a lone `<button>` line reading `config`; it is wrapped in the same guard as `OpenChatButton` (labelled).
+**N10. Chat controls' feedback sample uses an undefined `analytics`.** [prebuilt-components/chat-controls](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat-controls)'s `onThumbsUp` / `onThumbsDown` call `analytics.track(...)` with no import or definition. The route follows the aws-strands-ts harness and records each thumb into local state (a Feedback list) instead of calling it. The page's toggle sample is a lone `<button>` line reading `config`; it is wrapped in the same guard as `OpenChatButton`, and `OpenChatButton` drives a `CopilotPopup` via `open`/`onOpenChange` rather than calling `setModalOpen(true)` (both labelled in the source).
 
 ### Where the TypeScript tabs are *better* than the Python ones
 

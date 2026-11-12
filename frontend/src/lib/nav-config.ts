@@ -125,7 +125,7 @@ export const NAV: NavGroup[] = [
         docPath: "/deepagents/prebuilt-components/chat-controls",
         summary: "Controlling the sidebar's open state from your own UI (open/onOpenChange or setModalOpen) and capturing thumbs-up/down feedback.",
         status: "partial",
-        statusNote: "Open/close samples mounted as printed. The feedback handlers call an analytics object the page never defines, so a thumb click throws. Not yet browser-checked.",
+        statusNote: "Layout matches aws-strands-ts: one surface with a Popup button, a sidebar toggle and a left sidebar whose thumbs record into a Feedback list. The page's analytics.track (never defined) is replaced by local state. Not yet browser-checked.",
         agentId: "sample_agent",
         hasDemo: true,
       },
