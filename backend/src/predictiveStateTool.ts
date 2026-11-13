@@ -19,7 +19,14 @@
  * `tool_call_id` because OpenAI rejects those. That check is the page's, kept
  * verbatim — and it is the same trap the State Rendering route hits.
  *
- * Two changes: the model id reads OPENAI_MODEL, and `shouldContinue` returns
+ * Model: since the 2026-11 doc sync the page prints `model: "gpt-6-luna"`
+ * with `modelKwargs: { parallel_tool_calls: false, reasoning_effort: "none" }`
+ * (was `gpt-5.4` without `reasoning_effort`). Copied verbatim; this used to
+ * read OPENAI_MODEL, but `reasoning_effort` is rejected by the repo's default
+ * `gpt-4o`, so the page's literal is used and the graph needs `gpt-6-luna`
+ * access.
+ *
+ * One change: `shouldContinue` returns
  * the typed node names LangGraph 1.4.9 expects rather than being cast to `any`.
  */
 
@@ -40,7 +47,6 @@ import {
   CopilotKitStateAnnotation,
 } from "@copilotkit/sdk-js/langgraph";
 
-import { OPENAI_MODEL } from "./shared.js";
 
 // 1. Define shared state with CopilotKit annotations
 const AgentStateAnnotation = Annotation.Root({
@@ -92,8 +98,8 @@ const tools = [stepProgressTool];
 // 3. Define the chat node
 async function chatNode(state: AgentState, config: RunnableConfig) {
   const model = new ChatOpenAI({
-    model: OPENAI_MODEL,
-    modelKwargs: { parallel_tool_calls: false },
+    model: "gpt-6-luna",
+    modelKwargs: { parallel_tool_calls: false, reasoning_effort: "none" },
   });
 
   const modelWithTools = model.bindTools!([

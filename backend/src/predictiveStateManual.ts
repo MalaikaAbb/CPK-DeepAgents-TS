@@ -15,7 +15,13 @@
  *    this variant uses `Annotation.Root` rather than a Zod schema. Annotations
  *    serialize fine on their own, so nothing is needed — noted only because the
  *    prebuilt variant on the same page does need `zodState`.
- * 2. The page's model id is `gpt-4o-mini`; every agent here reads OPENAI_MODEL.
+ * 2. Model: since the 2026-11 doc sync the page builds
+ *    `new ChatOpenAI({ modelKwargs: { reasoning_effort: "none" }, model: "gpt-6-luna" })`
+ *    (was `{ model: "gpt-4o-mini" }`). That line is copied verbatim: the new
+ *    `reasoning_effort` kwarg is rejected by non-reasoning models such as this
+ *    repo's `OPENAI_MODEL` default `gpt-4o`, so the old "read OPENAI_MODEL"
+ *    substitution no longer composes with the page's code. The graph now needs
+ *    an OpenAI key with `gpt-6-luna` access.
  * 3. `MemorySaver` is imported from `@langchain/langgraph` on the page. In
  *    1.4.9 it lives in `@langchain/langgraph-checkpoint`, re-exported from the
  *    root — so the page's import works, and is kept.
@@ -44,11 +50,10 @@ import type { RunnableConfig } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
 import { SystemMessage } from "@langchain/core/messages";
 
-import { OPENAI_MODEL } from "./shared.js";
 
 // Define your custom graph node
 async function chatNode(state: AgentState, config: RunnableConfig) {
-  const model = new ChatOpenAI({ model: OPENAI_MODEL });
+  const model = new ChatOpenAI({ modelKwargs: { reasoning_effort: "none" }, model: "gpt-6-luna" });
 
     const steps = [
         "Analyzing input data...",

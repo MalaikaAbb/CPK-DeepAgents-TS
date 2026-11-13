@@ -241,14 +241,14 @@ Reading agent state as ordinary reactive React state.
 *Fail:* a dump with everything except `language` — the field lost its `zodState` wrapper.
 
 **`/shared-state/in-app-agent-write`** → `shared_state_agent` ⚠️
-`agent.setState` from the app, plus `agent.runAgent` to re-run immediately.
-*Try:* `Tell me a fun fact about octopuses`, hit **Toggle Language**, ask again.
+`agent.setState` from the app, plus `copilotkit.runAgent({ agent })` (from `useCopilotKit()`, was `agent.runAgent()` before the 2026-11 doc sync) to re-run immediately — the **Toggle + copilotkit.runAgent** button.
+*Try:* `Tell me a fun fact about octopuses`, hit **Toggle Language**, ask again; then hit **Toggle + copilotkit.runAgent** — a new reply starts with no typing (not yet browser-checked).
 *Pass:* the panel and JSON dump flip to `spanish` and the value survives the round trip — the write works.
 *Known limit:* **the reply stays in English.** The model never sees the value, and `exposeState` cannot reach it. Measured; see [§9 item 2](#9-known-issues--docvsimplementation-discrepancies).
 
 **`/shared-state/predictive-state-updates`** → `predictive_state_agent`, `predictive_manual_graph`, `predictive_tool_graph`
 **All three of the page's variants are live here**, behind a toggle — the sharpest advantage this repo has over the Python sibling, whose tabs only sketch the custom graphs.
-*Try:* `Plan and execute a website redesign` on each tab.
+*Try:* `Plan and execute a website redesign` on each tab. (All three graphs run the page's `gpt-6-luna` since 2026-11 — see §9 item 12.)
 *Pass:* **Prebuilt** — step rows appear one at a time *before* the chat message completes. **Custom · manual** — exactly four fixed rows, one per second, then an ordinary answer (verified: four distinct states in order). **Custom · tool** — steps stream as the model writes the tool call, then a `ToolNode` runs it and the graph loops back.
 *Fail:* nothing at all — the provider is `<CopilotKitProvider>` rather than `<CopilotKit>`; see [§9 item 5](#9-known-issues--docvsimplementation-discrepancies).
 
@@ -523,6 +523,7 @@ It was `<CopilotKit agent="sample_agent">`. This repo's root provider stays `<Co
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+Exception since the 2026-11 doc sync: all three [predictive-state-updates](https://docs.copilotkit.ai/deepagents/shared-state/predictive-state-updates) variants now print `gpt-6-luna`, and the two custom graphs add `reasoning_effort: "none"` to `modelKwargs`. That kwarg is rejected by non-reasoning models like the `gpt-4o` default, so `predictive_state_agent`, `predictive_manual_graph` and `predictive_tool_graph` now use the page's literals verbatim and need an OpenAI key with `gpt-6-luna` access.
 The 2026-11 doc sync moved the [quickstart](https://docs.copilotkit.ai/deepagents/quickstart) agent from `openai:gpt-4o` to `openai:gpt-6-luna` (both tabs). `backend/agent.ts` keeps reading `MODEL`; set `OPENAI_MODEL=gpt-6-luna` to run the page's literal.
 The 2026-11 doc sync moved [state-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/state-rendering) (from `gpt-5.4`) and [tool-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/tool-rendering) (from `gpt-4o`) to `openai:gpt-6-luna`. State Rendering's agent hardcodes its page's literal, so `state_rendering_agent` now runs `gpt-6-luna` and fails if the OpenAI key has no access to that model; Tool Rendering still reads `OPENAI_MODEL`. The Python tabs now build `ChatOpenAI(model="gpt-6-luna", reasoning_effort="none")`; the TypeScript tabs pass only the string, with no reasoning-effort setting.
 
