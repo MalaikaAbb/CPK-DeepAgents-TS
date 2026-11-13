@@ -47,10 +47,14 @@ export default function Page() {
         <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
           Two buttons, because the page has two variants.{" "}
           <strong>Toggle Language</strong> writes and waits — nothing happens
-          until you send a message. <strong>Toggle + runAgent()</strong> is the
-          page&apos;s &ldquo;Advanced Usage&rdquo; section: it starts a run
-          immediately, and the agent replies in the new language without you
-          typing anything.
+          until you send a message. <strong>Toggle + copilotkit.runAgent</strong>{" "}
+          is the page&apos;s &ldquo;Re-run the agent with updated state&rdquo;
+          section: it starts a run immediately without you typing anything.
+          Since the 2026-11 doc sync that section calls{" "}
+          <code>copilotkit.runAgent(&#123; agent &#125;)</code> from{" "}
+          <code>useCopilotKit()</code> instead of <code>agent.runAgent()</code>,
+          so the run carries the app&apos;s frontend tools and context and
+          executes frontend tool calls.
         </p>
         <div className="mt-4">
           <TryIt
@@ -62,7 +66,7 @@ export default function Page() {
               <>
                 The panel and the JSON dump flip to <code>spanish</code> and
                 the value survives the round trip — that is the write working.{" "}
-                <strong>Toggle + runAgent()</strong> produces a fresh reply on
+                <strong>Toggle + copilotkit.runAgent</strong> produces a fresh reply on
                 its own, no typing. The reply itself stays in English; see the
                 callout below.
               </>
