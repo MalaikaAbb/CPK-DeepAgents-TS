@@ -24,7 +24,14 @@ import type { ReactNode } from "react";
  * lives. Without it the Predictive State Updates route silently shows nothing —
  * the event arrives and no one is listening.
  *
- * The Quickstart also names its one agent here (`agent="sample_agent"`). This
+ * Since the 2026-11 doc sync the Quickstart prints
+ * `<CopilotKitProvider runtimeUrl="/api/copilotkit" agentId="sample_agent"
+ * useSingleEndpoint={false}>` instead of `<CopilotKit agent=...>`. This file
+ * deliberately stays on `<CopilotKit>` for the `CopilotListeners` reason above
+ * (README §9 item 11b); the bare provider would silence Predictive State
+ * Updates.
+ *
+ * The Quickstart also names its one agent here (`agentId="sample_agent"`). This
  * repo registers a graph per doc route, so no agent is named and each route
  * passes the `agentId` it wants.
  *
