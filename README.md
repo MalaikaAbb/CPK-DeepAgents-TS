@@ -259,6 +259,16 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 
 **`/intelligence/quickstart`** — ⚠️ **Partial.** Steps 3 and 4 are implemented; steps 1, 2 and 5 are not. The 2026-09-09 sync rewrote step 3 from the multi-route handler to `mode: "single-route"` with a single `POST` export, and step 4 from `runtimeUrl` alone to `runtimeUrl` plus `useSingleEndpoint`. Neither needs a hosted project, so both are mounted now: `/api/copilotkit-single` takes the same runtime object as the multi-route mount, and `/intelligence/quickstart/demo-chat` drives it. Steps 1, 2 and 5 still open with `npx copilotkit@latest login` plus `project select`, which writes a `CPK_INTELLIGENCE_API_KEY` — an account-scoped resource this harness does not have, so the confirmation step has nothing to assert against. Three findings came out of the half that is testable, all on the route's page: the single endpoint accepts seven envelope methods and no thread, memory or annotation method is among them; single-route mode reports `threadEndpointsEnabled: false` from `/info`, which locks the Inspector thread list the page's last step tells you to check; and the page's own coding-agent prompt still instructs the reader to do the opposite of its manual steps. Still tracked as new because it is a genuinely new page; the rest of `/deepagents/intelligence/*` is the old `/deepagents/premium/*` set renamed, and stays out of scope.
 
+### Human-in-the-loop
+
+**`/human-in-the-loop/index`** — ❌ **Broken (reference-only).** Compares `useHumanInTheLoop` (the model calls a client tool that renders and `respond`s) with `useInterrupt` (the graph calls `interrupt()`). Both examples are missing `deepagents::hitl-in-chat` snippets. The route links to this repo's working Governed Actions and Interrupt-based HITL routes.
+*Pass:* the gap panel renders.
+
+**`/human-in-the-loop/useInterrupt`** — ❌ **Broken (reference-only).** `useInterrupt` renders a component when a run ends with `outcome.type === "interrupt"` and resumes it with `resolve(payload, id?)` / `cancel(id?)`. The rendered Deep Agents page says it is "Not available on this framework" and prints no backend; its three frontend snippets are shown. The claim contradicts `/generative-ui/your-components/interrupt-based`, which works.
+*Pass:* the page renders the banner callout and code.
+
+**`/human-in-the-loop/headless`** — ❌ **Broken (reference-only).** Resolving interrupts from plain UI via `agent.subscribe` + `copilotkit.runAgent` instead of a `useInterrupt` render slot. The rendered Deep Agents page says "Not available on this framework" and prints no code.
+*Pass:* the banner callout renders.
 ### Generative UI · Open-ended
 
 **`/generative-ui/mcp-apps`** → `sample_agent` via `/api/copilotkit-mcp-apps` — ⚠️ Partial. The page's runtime route as printed: a `LangGraphAgent` on graph `sample_agent` with `MCPAppsMiddleware` pointing at `https://mcp.excalidraw.com`, mounted on its own path so the shared runtime is untouched; the demo nests a `CopilotKitProvider` aimed at it.
@@ -400,6 +410,9 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [shared-state/state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) | `/shared-state/state-inputs-outputs` | — | 📄 Reference | Graph filters correctly; JS dev server ignores `output`, so nothing to show live |
 | [shared-state/workflow-execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution) | `/shared-state/workflow-execution` | — | 📄 Reference | Upstream duplicate of the page above; nothing of its own to implement |
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
+| [human-in-the-loop/index](https://docs.copilotkit.ai/deepagents/human-in-the-loop/index) | `/human-in-the-loop/index` | — | ❌ Broken | Reference-only: `deepagents::hitl-in-chat` snippets missing |
+| [human-in-the-loop/useInterrupt](https://docs.copilotkit.ai/deepagents/human-in-the-loop/useInterrupt) | `/human-in-the-loop/useInterrupt` | — | ❌ Broken | Reference-only: page says "Not available on this framework" (contradicted by the working interrupt-based route); no Deep Agents backend |
+| [human-in-the-loop/headless](https://docs.copilotkit.ai/deepagents/human-in-the-loop/headless) | `/human-in-the-loop/headless` | — | ❌ Broken | Reference-only: page says "Not available on this framework"; no code printed |
 | [generative-ui/mcp-apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps) | `/generative-ui/mcp-apps` | `sample_agent` | ⚠️ Partial | Page route mounted at `/api/copilotkit-mcp-apps`; needs `LANGGRAPH_DEPLOYMENT_URL` (page falls back to 8123); not yet browser-checked |
 | [generative-ui/open-generative-ui](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) | `/generative-ui/open-generative-ui` | — | ❌ Broken | Reference-only: all setup snippets missing for Deep Agents |
 | [generative-ui/components](https://docs.copilotkit.ai/deepagents/generative-ui/components) | `/generative-ui/components` | `components_agent` | ⚠️ Partial | Live: `standardUI` provider. `BuiltInAgent` → `components_agent` (Deep Agents). Not yet browser-checked. N14 |
@@ -507,6 +520,7 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 ### 2026-11 doc sync: new pages
 
+**N17. HITL pages: missing examples, and a wrong "not available" banner.** [human-in-the-loop/index](https://docs.copilotkit.ai/deepagents/human-in-the-loop/index) renders two missing `deepagents::hitl-in-chat` snippets. [useInterrupt](https://docs.copilotkit.ai/deepagents/human-in-the-loop/useInterrupt) and [headless](https://docs.copilotkit.ai/deepagents/human-in-the-loop/headless) open with **"Not available on this framework"**, claiming the feature needs a native `interrupt(...)` primitive such as LangGraph's. Deep Agents are LangGraph graphs, and this repo's `/generative-ui/your-components/interrupt-based` runs `useInterrupt` against a Deep Agents middleware calling `interrupt()` successfully, so the banner contradicts a working route. None of the three publishes a Deep Agents backend; all three are reference-only, ❌ Broken.
 **N15. MCP Apps: port fallback and an unlisted package.** [generative-ui/mcp-apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps)'s route falls back to `http://localhost:8123` for the LangGraph server and exports only `GET`/`POST`. It imports `MCPAppsMiddleware` from `@ag-ui/mcp-apps-middleware` without telling you to install it; it resolves here only because `@copilotkit/runtime` 1.72.0 depends on 0.1.1. Kept as printed at `/api/copilotkit-mcp-apps` (its own mount, `basePath` changed to match). Watch for an `@ag-ui/client` type clash on `agent.use(...)`: the root pins `@ag-ui/client` 1.0.0 while CopilotKit 1.72 nests 0.0.59 (see AGENTS.md). tsc rejects `agents: { sample_agent: agent }` (TS2769): the `LangGraphAgent` comes from the root `@ag-ui/client` 1.0.0 while CopilotKit 1.72 types `AbstractAgent` against its nested 0.0.59, so the message types differ; suppressed with `@ts-expect-error`, the fix is aligning the `@ag-ui` pins (dependency PR, out of scope here).
 
 **N16. Open Generative UI publishes no Deep Agents setup.** [generative-ui/open-generative-ui](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) renders "No demo found" for `deepagents::open-gen-ui` (×2) and `deepagents::open-gen-ui-advanced` (×2): runtime enablement, chat page and sandbox-function provider are all missing. Only a CDN `<script>` example is printed. Reference-only, ❌ Broken.
@@ -737,6 +751,10 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 - [Input/Output Schemas](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) *(no TypeScript tab)*
 - [Workflow Execution](https://docs.copilotkit.ai/deepagents/shared-state/workflow-execution)
 
+**Human-in-the-loop**
+- [HITL Overview](https://docs.copilotkit.ai/deepagents/human-in-the-loop/index) — reference-only
+- [Pausing the Agent for Input](https://docs.copilotkit.ai/deepagents/human-in-the-loop/useInterrupt) — reference-only
+- [Headless Interrupts](https://docs.copilotkit.ai/deepagents/human-in-the-loop/headless) — reference-only
 **Generative UI · Open-ended**
 - [MCP Apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps)
 - [Open Generative UI](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) — reference-only

@@ -468,6 +468,30 @@ export const NAV: NavGroup[] = [
         statusNote:
           "The tool-call variant, with the page's schema unchanged — `z.record(z.unknown())` is valid on this repo's zod 3. The `useInterrupt` variant needs a backend that pauses a run and attaches `interrupt.metadata.action`, which no agent here does.",
       },
+      {
+        path: "/human-in-the-loop/index",
+        title: "HITL Overview",
+        docPath: "/deepagents/human-in-the-loop/index",
+        summary: "The two ways to pause an agent for the user: model-initiated useHumanInTheLoop tools and graph-enforced useInterrupt.",
+        status: "broken",
+        statusNote: "Reference-only. Both worked examples are missing deepagents::hitl-in-chat snippets and the setup is 'not bundled for deepagents'. Working examples of both patterns exist on Governed Actions and Interrupt-based HITL.",
+      },
+      {
+        path: "/human-in-the-loop/useInterrupt",
+        title: "Pausing the Agent for Input",
+        docPath: "/deepagents/human-in-the-loop/useInterrupt",
+        summary: "useInterrupt rendering a component for a graph-enforced interrupt() and resuming the run with resolve/cancel.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered page says 'Not available on this framework' (contradicted by this repo's working Interrupt-based HITL route) and publishes no Deep Agents backend; its frontend snippets are shown, not mounted.",
+      },
+      {
+        path: "/human-in-the-loop/headless",
+        title: "Headless Interrupts",
+        docPath: "/deepagents/human-in-the-loop/headless",
+        summary: "Resolving agent interrupts from any UI by subscribing to the agent and resuming with copilotkit.runAgent, without a useInterrupt slot.",
+        status: "broken",
+        statusNote: "Reference-only. The rendered page says 'Not available on this framework' and prints no code for Deep Agents.",
+      },
     ],
   },
   {
