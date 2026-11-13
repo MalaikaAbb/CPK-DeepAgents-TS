@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { RouteHeader, StatusBadge } from "@/components/route-header";
-import { Callout, KeyValue, Panel } from "@/components/ui";
+import { Callout, CodeBlock, KeyValue, Panel } from "@/components/ui";
 import { ALL_ROUTES, DOCS_ROOT } from "@/lib/nav-config";
 import { GRAPH_IDS, LANGGRAPH_DEPLOYMENT_URL } from "@/lib/agents";
 import { DocSyncedAt } from "@/components/doc-synced-at";
@@ -11,6 +11,35 @@ import { DocDriftPanel } from "@/components/doc-drift-panel";
 export const dynamic = "force-dynamic";
 
 const ROUTES_WITH_AGENTS = ALL_ROUTES.filter((r) => r.agentId);
+
+/**
+ * The "connect" snippet the Introduction page prints since the 2026-11 doc
+ * sync, copied as published. It is shown here for comparison only; the
+ * harness's real mount is `app/api/copilotkit/[[...slug]]/route.ts`, which
+ * builds the same runtime/handler shape with one LangGraphAgent per graph.
+ */
+const INTRO_CONNECT_SNIPPET = `import { CopilotRuntime, createCopilotRuntimeHandler } from "@copilotkit/runtime/v2";
+import { LangGraphAgent } from "@copilotkit/runtime/langgraph";
+
+const runtime = new CopilotRuntime({
+  agents: {
+    sample_agent: new LangGraphAgent({
+      deploymentUrl: process.env.LANGGRAPH_DEPLOYMENT_URL!,
+      graphId: "sample_agent",
+      langsmithApiKey: process.env.LANGSMITH_API_KEY!,
+    }),
+  },
+});
+
+const handler = createCopilotRuntimeHandler({
+  runtime,
+  basePath: "/api/copilotkit",
+});
+
+export const GET = handler;
+export const POST = handler;
+export const PATCH = handler;
+export const DELETE = handler;`;
 
 export default function Page() {
   return (
@@ -101,6 +130,29 @@ export default function Page() {
           feature because the JS dev server ignores <code>output</code> schemas.
           The <code>state_io_graph</code> is still served and its source is on
           that route.
+        </p>
+      </Panel>
+
+      <Panel
+        title="How the page says to connect"
+        description="The Introduction now prints a single runtime route; the agent itself is untouched and reached over AG-UI."
+      >
+        <CodeBlock
+          filename="app/api/copilotkit/[[...slug]]/route.ts (doc page)"
+          language="ts"
+          code={INTRO_CONNECT_SNIPPET}
+        />
+        <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+          This harness mounts the same shape at{" "}
+          <code>frontend/src/app/api/copilotkit/[[...slug]]/route.ts</code>,
+          with the runtime factored into{" "}
+          <code>frontend/src/lib/intelligence-runtime.ts</code> so it can register
+          one <code>LangGraphAgent</code> per graph and switch to Intelligence
+          mode when a project key is set. Two small differences from the
+          snippet: the harness defaults <code>LANGGRAPH_DEPLOYMENT_URL</code> to{" "}
+          <code>http://localhost:8124</code> and <code>LANGSMITH_API_KEY</code>{" "}
+          to <code>&quot;&quot;</code> rather than asserting them with{" "}
+          <code>!</code>, and it exports the four verbs in one statement.
         </p>
       </Panel>
 

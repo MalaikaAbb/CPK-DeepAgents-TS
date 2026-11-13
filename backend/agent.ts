@@ -4,8 +4,8 @@
  * https://docs.copilotkit.ai/deepagents/quickstart  (TypeScript tab)
  *
  * The page's `agent.ts` verbatim, with one substitution: `model` reads
- * `src/shared.ts`'s `MODEL` instead of the literal `"openai:gpt-4o"` the page
- * prints, so every agent in this backend can be pointed at one model from
+ * `src/shared.ts`'s `MODEL` instead of the literal `"openai:gpt-6-luna"` the
+ * page prints (it was `"openai:gpt-4o"` until the 2026-11 doc sync), so every agent in this backend can be pointed at one model from
  * `.env`.
  *
  * `langgraph.json` maps this module's `agent` to the graph id `sample_agent`,
