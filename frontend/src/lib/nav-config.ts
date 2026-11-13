@@ -576,10 +576,10 @@ export const NAV: NavGroup[] = [
         title: "Intelligence · Quickstart",
         docPath: "/deepagents/intelligence/quickstart",
         summary:
-          "The single-route runtime transport this page switched to: one POST mount plus `useSingleEndpoint` on the provider.",
+          "Connecting the runtime to Intelligence: the multi-route [[...slug]] handler plus useSingleEndpoint={false} the page prints again since 2026-11, the /info discovery check, and the older single-route transport it still allows.",
         status: "partial",
         statusNote:
-          "Steps 3 and 4 are implemented against a third runtime mount at `/api/copilotkit-single`. Steps 1, 2 and 5 need a `CPK_INTELLIGENCE_API_KEY` from a hosted Intelligence project, which is an account-scoped resource this harness does not have.",
+          "The TypeScript connect + discovery steps run against the main `/api/copilotkit` mount; the single-route tab stays at `/api/copilotkit-single`. Sign-in, `project select` and the saved-thread confirmation need a `CPK_INTELLIGENCE_API_KEY` from a hosted Intelligence project, which this harness does not have. The new multi-route tab is not yet browser-checked.",
         hasDemo: true,
       },
     ],

@@ -4,9 +4,24 @@ import { CopilotChat } from "@copilotkit/react-core/v2";
 import { useState } from "react";
 
 import { DemoFrame } from "@/components/demo-frame";
+import { MultiRouteProvider } from "@/components/multi-route-provider";
 import { SingleEndpointProvider } from "@/components/single-endpoint-provider";
 
 /**
+ * Two tabs since the 2026-11 doc sync.
+ *
+ *   multi  — what the page now prints for a TypeScript runtime: the
+ *            `[[...slug]]` handler with four verbs (this repo's main
+ *            `/api/copilotkit` mount) and `useSingleEndpoint={false}` on the
+ *            provider, plus the page's new "Confirm the connection" step — a
+ *            GET of `{runtimeUrl}/info` that should report
+ *            `mode: "intelligence"` and the registered agent.
+ *   single — the single-route transport the page prescribed from 2026-09-09
+ *            until this sync. The page now keeps it only as "if your existing
+ *            app uses that mode, keep it", so it stays here as the second tab.
+ *
+ * The single-route tab's notes follow.
+ *
  * The single-route transport, and a probe for the claim attached to it.
  *
  * The chat below runs entirely through `POST /api/copilotkit-single`. Nothing
@@ -122,22 +137,154 @@ function ProbePanel() {
   );
 }
 
+//#region confirm-connection
+/**
+ * The page's "Confirm the connection" step, done from the browser instead of
+ * `curl --fail http://localhost:3000/api/copilotkit/info`. Pass = HTTP 200,
+ * `mode: "intelligence"`, and `sample_agent` among the agents. Without
+ * `CPK_INTELLIGENCE_API_KEY` this runtime reports SSE mode, which is the
+ * page's own "chat works, and the project has no thread" case.
+ */
+function InfoCheck() {
+  const [result, setResult] = useState<
+    { status: number; mode?: string; agents?: string[]; raw: string } | null
+  >(null);
+
+  async function check() {
+    try {
+      const response = await fetch("/api/copilotkit/info", {
+        headers: { "x-user-id": "harness-local", "x-user-name": "Harness User" },
+      });
+      const raw = await response.text();
+      let mode: string | undefined;
+      let agents: string[] | undefined;
+      try {
+        const json = JSON.parse(raw) as {
+          mode?: string;
+          agents?: Record<string, unknown> | { id?: string; name?: string }[];
+        };
+        mode = json.mode;
+        agents = Array.isArray(json.agents)
+          ? json.agents.map((a) => a?.id ?? a?.name ?? "?")
+          : json.agents
+            ? Object.keys(json.agents)
+            : undefined;
+      } catch {
+        // not JSON; show raw
+      }
+      setResult({ status: response.status, mode, agents, raw: raw.slice(0, 400) });
+    } catch (error) {
+      setResult({ status: 0, raw: String(error) });
+    }
+  }
+
+  return (
+    <div className="shrink-0 border-b border-slate-200 p-3 text-xs dark:border-slate-800">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={check}
+          className="rounded-md border border-[var(--accent)] px-3 py-1.5 text-sm text-[var(--accent)]"
+        >
+          GET /api/copilotkit/info
+        </button>
+        <span className="text-slate-500">
+          The page&apos;s discovery check. Expect <code>mode: &quot;intelligence&quot;</code>{" "}
+          and your agent.
+        </span>
+      </div>
+      {result && (
+        <div className="mt-2 font-mono text-slate-700 dark:text-slate-300">
+          <div>
+            status{" "}
+            <span
+              className={
+                result.status === 200
+                  ? "text-emerald-700 dark:text-emerald-400"
+                  : "text-rose-700 dark:text-rose-400"
+              }
+            >
+              {result.status}
+            </span>{" "}
+            · mode{" "}
+            <span
+              className={
+                result.mode === "intelligence"
+                  ? "text-emerald-700 dark:text-emerald-400"
+                  : "text-amber-700 dark:text-amber-400"
+              }
+            >
+              {result.mode ?? "?"}
+            </span>{" "}
+            · agents {result.agents?.join(", ") ?? "?"}
+          </div>
+          {result.mode === undefined && (
+            <div className="mt-1 break-all">{result.raw}</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+//#endregion
+
+const TABS = [
+  { id: "multi", label: "Multi-route (page now)" },
+  { id: "single", label: "Single-route (kept, older page)" },
+] as const;
+
 export default function Page() {
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("multi");
+
   return (
     <DemoFrame
       parentPath="/intelligence/quickstart"
-      subtitle="single-route transport · /api/copilotkit-single"
+      subtitle={
+        tab === "multi"
+          ? "multi-route transport · /api/copilotkit"
+          : "single-route transport · /api/copilotkit-single"
+      }
     >
-      <SingleEndpointProvider>
-        <div className="flex h-full flex-col">
-          <ProbePanel />
-          <div className="min-h-0 flex-1">
-            {/* [3] intelligence quickstart: chat over the single endpoint */}
-            {/* [!code highlight] */}
-            <CopilotChat agentId="sample_agent" />
-          </div>
+      <div className="flex h-full flex-col">
+        <div className="flex shrink-0 gap-2 border-b border-slate-200 px-3 py-2 text-xs dark:border-slate-800">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`rounded px-2 py-1 ${
+                tab === t.id
+                  ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
+                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
-      </SingleEndpointProvider>
+
+        {tab === "multi" ? (
+          <MultiRouteProvider>
+            <div className="flex min-h-0 flex-1 flex-col">
+              <InfoCheck />
+              <div className="min-h-0 flex-1">
+                <CopilotChat agentId="sample_agent" />
+              </div>
+            </div>
+          </MultiRouteProvider>
+        ) : (
+          <SingleEndpointProvider>
+            <div className="flex min-h-0 flex-1 flex-col">
+              <ProbePanel />
+              <div className="min-h-0 flex-1">
+                {/* [3] intelligence quickstart: chat over the single endpoint */}
+                {/* [!code highlight] */}
+                <CopilotChat agentId="sample_agent" />
+              </div>
+            </div>
+          </SingleEndpointProvider>
+        )}
+      </div>
     </DemoFrame>
   );
 }
