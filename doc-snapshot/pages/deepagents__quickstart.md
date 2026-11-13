@@ -21,9 +21,9 @@ Before you begin, you'll need the following:
 
 <Steps>
     <Step>
-        ### Create a free account
+        ### Set up CopilotKit Intelligence
 
-        <SignupLink surface="docs_deepagents_quickstart_step1">Sign up for a free developer account</SignupLink> for CopilotKit Intelligence to get a license key. You'll use it later to enable persistent threads and the inspector.
+        <SignupLink surface="docs_deepagents_quickstart_step1">Sign in to cloud-hosted Intelligence</SignupLink>. Cloud-hosted setup uses a server-side project API key and does not issue `COPILOTKIT_LICENSE_TOKEN`. You will connect the app after you create it below.
     </Step>
 
     <Step>
@@ -85,7 +85,7 @@ Before you begin, you'll need the following:
                     return f"The weather in {location} is sunny."
 
                 agent = create_deep_agent(
-                    model="openai:gpt-4o",
+                    model="openai:gpt-6-luna",
                     tools=[get_weather],
                     middleware=[CopilotKitMiddleware()], # for frontend tools and context
                     system_prompt="You are a helpful research assistant.",
@@ -130,7 +130,7 @@ Before you begin, you'll need the following:
                 );
 
                 export const agent = createDeepAgent({
-                    model: "openai:gpt-4o",
+                    model: "openai:gpt-6-luna",
                     tools: [getWeather],
                     middleware: [copilotkitMiddleware],
                     systemPrompt: "You are a helpful research assistant.",
@@ -182,7 +182,7 @@ Before you begin, you'll need the following:
                     return f"The weather in {location} is sunny."
 
                 agent = create_deep_agent(
-                    model="openai:gpt-4o",
+                    model="openai:gpt-6-luna",
                     tools=[get_weather],
                     middleware=[CopilotKitMiddleware()], # for frontend tools and context
                     system_prompt="You are a helpful research assistant.",
@@ -246,8 +246,11 @@ Before you begin, you'll need the following:
         ### Install CopilotKit packages
 
         ```npm
-        npm install @copilotkit/react-ui @copilotkit/react-core @copilotkit/runtime
+        npm install @copilotkit/react-core @copilotkit/runtime @ag-ui/client@1.0.2
         ```
+
+        The **FastAPI** route below imports `HttpAgent` from `@ag-ui/client`.
+        Version `1.0.2` matches the one `@copilotkit/runtime` uses.
     </Step>
     <Step>
         ### Setup Copilot Runtime
@@ -255,7 +258,7 @@ Before you begin, you'll need the following:
         Create an API route to connect CopilotKit to your Deep Agent:
 
         ```sh
-        mkdir -p app/api/copilotkit && touch app/api/copilotkit/route.ts
+        mkdir -p "app/api/copilotkit/[[...slug]]" && touch "app/api/copilotkit/[[...slug]]/route.ts"
         ```
 
         <Callout type="info" title="Using Next.js is optional">
@@ -300,6 +303,8 @@ Before you begin, you'll need the following:
 
                 export const GET = handler;
                 export const POST = handler;
+                export const PATCH = handler;
+                export const DELETE = handler;
                 ```
             </Tab>
             <Tab value="FastAPI">
@@ -335,14 +340,21 @@ Before you begin, you'll need the following:
 
                 export const GET = handler;
                 export const POST = handler;
+                export const PATCH = handler;
+                export const DELETE = handler;
                 ```
             </Tab>
         </Tabs>
 
-        The runtime reads the project API key from step 1. Add it to the app that serves
-        this route:
+        From this frontend app directory, connect the runtime to an Intelligence project:
 
-        ```plaintext title=".env.local"
+        ```bash title="Terminal"
+        npx copilotkit@latest project select
+        ```
+
+        The command writes the server-side project API key to `.env`. The runtime reads it here:
+
+        ```plaintext title=".env"
         CPK_INTELLIGENCE_API_KEY=cpk-...
         ```
 
@@ -350,7 +362,7 @@ Before you begin, you'll need the following:
           Drop the `intelligence` and `identifyUser` options and the runtime falls back
           to SSE mode with an in-memory runner. Chat still works, but Threads and the
           Inspector stay locked and the key is never read. See
-          [Connect your runtime to Intelligence](/deepagents/intelligence/connect-your-runtime) for the
+          [Connect your runtime to Intelligence](/deepagents/intelligence/quickstart) for the
           full constructor and how to confirm the key is in use.
         </Callout>
     </Step>
@@ -362,13 +374,13 @@ Before you begin, you'll need the following:
         ```tsx title="app/providers.tsx"
         "use client";
 
-        import { CopilotKit } from "@copilotkit/react-core/v2";
+        import { CopilotKitProvider } from "@copilotkit/react-core/v2";
 
         export function Providers({ children }: { children: React.ReactNode }) {
           return (
-            <CopilotKit runtimeUrl="/api/copilotkit" agent="sample_agent" useSingleEndpoint={false}>
+            <CopilotKitProvider runtimeUrl="/api/copilotkit" agentId="sample_agent" useSingleEndpoint={false}>
               {children}
-            </CopilotKit>
+            </CopilotKitProvider>
           );
         }
         ```
@@ -495,7 +507,7 @@ On localhost, click the Inspector button in the corner of the app.
 
 1. Open **Agents**, then **Agent**. Your agent is listed.
 2. Send a chat message. Open **Agents**, then **AG-UI Events**. Events are moving.
-3. Open **Threads**. The list is unlocked (Intelligence is on), or locked with Enable Intelligence (Intelligence is off).
+3. Open **Rich Threads**. The list is unlocked (Intelligence is on), or locked with Enable Intelligence (Intelligence is off).
 
 More detail: [Inspector](/deepagents/inspector).
 
