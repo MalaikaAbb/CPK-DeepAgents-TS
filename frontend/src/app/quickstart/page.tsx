@@ -103,6 +103,41 @@ export default function Page() {
         </p>
       </Callout>
 
+      <Callout tone="warn" title="What the 2026-11 sync changed here">
+        <p>
+          <strong>Provider.</strong> Step 6 now wraps the app in{" "}
+          <code>
+            &lt;CopilotKitProvider runtimeUrl=&quot;/api/copilotkit&quot;
+            agentId=&quot;sample_agent&quot; useSingleEndpoint={"{false}"}&gt;
+          </code>{" "}
+          instead of <code>&lt;CopilotKit agent=&quot;sample_agent&quot;&gt;</code>.
+          This harness keeps <code>&lt;CopilotKit&gt;</code> at the root: the bare
+          provider does not mount <code>CopilotListeners</code>, which the
+          Predictive State Updates route depends on (README §9 items 5 and 11b).
+          Nothing on this route needs the listener, and the page does not
+          mention the trade-off.
+        </p>
+        <p className="mt-2">
+          <strong>Model.</strong> The agent now prints{" "}
+          <code>model: &quot;openai:gpt-6-luna&quot;</code>. <code>backend/agent.ts</code>{" "}
+          still reads <code>OPENAI_MODEL</code> (default <code>gpt-4o</code>);
+          set it to <code>gpt-6-luna</code> to run the page&apos;s literal.
+        </p>
+        <p className="mt-2">
+          <strong>Install + key.</strong> The install line dropped{" "}
+          <code>@copilotkit/react-ui</code> and added{" "}
+          <code>@ag-ui/client@1.0.2</code>, which only the FastAPI runtime tab
+          imports — not this repo&apos;s Deep Agent tab, so the pin is not applied.
+          The project key now comes from{" "}
+          <code>npx copilotkit@latest project select</code>, written to{" "}
+          <code>.env</code> rather than <code>.env.local</code>; step 1 is now
+          &ldquo;sign in to cloud-hosted Intelligence&rdquo;, which does not
+          issue <code>COPILOTKIT_LICENSE_TOKEN</code>. The runtime route
+          step&apos;s <code>[[...slug]]</code> path and PATCH/DELETE exports now
+          match what this repo already mounted.
+        </p>
+      </Callout>
+
       <Callout tone="info" title="What the 2026-09-04 sync changed here">
         The Quickstart&apos;s <code>.env.local</code> block renamed{" "}
         <code>INTELLIGENCE_API_KEY</code> to{" "}

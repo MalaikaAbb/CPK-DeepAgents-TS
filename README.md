@@ -167,7 +167,7 @@ Every route has a notes page (source, discrepancies, a **Try it** box) and, wher
 
 ### Getting Started
 
-**`/`** — Introduction. Orientation and the live graph roster. Nothing to drive.
+**`/`** — Introduction. Orientation and the live graph roster, plus the runtime-route "connect" snippet the doc page prints (2026-11), shown beside a pointer to the harness's own mount. Nothing to drive.
 
 **`/quickstart`** → `sample_agent`
 Proves the whole stack in one message: a Deep Agent with a single `tool()` call, published by the LangGraph server, reached through `CopilotRuntime`, driven by a `CopilotSidebar`.
@@ -514,11 +514,15 @@ It prints `chatNode` and stops, saying only that it belongs "inside a custom gra
 **10. `workflow-execution` serves the wrong page.**
 It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-state/state-inputs-outputs) byte for byte — same subtitle, prose, code. Only the `h1` differs, and even the subtitle describes the *other* page's topic. Marked 📄 reference rather than guessed at — there is no Workflow Execution content to implement until the page serves its own.
 
-**11. The Quickstart installs a frontend package it never uses.**
-`npm install @copilotkit/react-ui @copilotkit/react-core @copilotkit/runtime`, but every import it then writes is from `@copilotkit/react-core/v2`. `@copilotkit/react-ui` is the v1 UI package; not installed here.
+**11. The Quickstart's install line (fixed upstream 2026-11).**
+It used to install `@copilotkit/react-ui`, the v1 UI package it never imported. It now reads `npm install @copilotkit/react-core @copilotkit/runtime @ag-ui/client@1.0.2`; the `@ag-ui/client` pin is for the **FastAPI** runtime tab's `HttpAgent`. This repo takes the Deep Agent (`LangGraphAgent`) tab, which does not import `@ag-ui/client`, so the existing `@ag-ui/client` version (matched to the installed `@copilotkit/react-core`, see AGENTS.md) is left alone.
+
+**11b. The Quickstart's provider is now `<CopilotKitProvider agentId="sample_agent">` (2026-11).**
+It was `<CopilotKit agent="sample_agent">`. This repo's root provider stays `<CopilotKit>`, because item 5 applies: the bare `CopilotKitProvider` does not mount `CopilotListeners`, so following the new Quickstart literally makes the Predictive State Updates route go silent. The Quickstart route itself does not depend on that listener, so the swap is harmless there; the page does not warn about the trade-off. The step 3 key note also moved: `npx copilotkit@latest project select` now writes `CPK_INTELLIGENCE_API_KEY` to `.env` (was `.env.local`). Next reads both; this README keeps `frontend/.env.local`.
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+The 2026-11 doc sync moved the [quickstart](https://docs.copilotkit.ai/deepagents/quickstart) agent from `openai:gpt-4o` to `openai:gpt-6-luna` (both tabs). `backend/agent.ts` keeps reading `MODEL`; set `OPENAI_MODEL=gpt-6-luna` to run the page's literal.
 The 2026-11 doc sync moved [state-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/state-rendering) (from `gpt-5.4`) and [tool-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/tool-rendering) (from `gpt-4o`) to `openai:gpt-6-luna`. State Rendering's agent hardcodes its page's literal, so `state_rendering_agent` now runs `gpt-6-luna` and fails if the OpenAI key has no access to that model; Tool Rendering still reads `OPENAI_MODEL`. The Python tabs now build `ChatOpenAI(model="gpt-6-luna", reasoning_effort="none")`; the TypeScript tabs pass only the string, with no reasoning-effort setting.
 
 ### 2026-11 doc sync: new pages
