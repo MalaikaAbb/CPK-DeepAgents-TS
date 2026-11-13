@@ -8,7 +8,7 @@ A navigable, working test harness for the CopilotKit ↔ Deep Agents (**TypeScri
 | **Doc root tracked** | <https://docs.copilotkit.ai/deepagents> |
 | **Language tab** | **TypeScript** throughout. The Python tabs are the sibling repo's job. |
 | **Backend flavour** | LangGraph CLI (`langgraph.json`), the tab the TypeScript page tells you to pick |
-| **CopilotKit (frontend)** | `@copilotkit/react-core` 1.69.3 · `@copilotkit/runtime` 1.69.3 |
+| **CopilotKit (frontend)** | `@copilotkit/react-core` 1.87.0 · `@copilotkit/runtime` 1.87.0 · `@ag-ui/client` 1.0.2 |
 | **CopilotKit (agent)** | `@copilotkit/sdk-js` 1.66.2 |
 | **Agent framework** | `deepagents` 1.12.2 · `langchain` 1.5.5 · `@langchain/langgraph` 1.4.9 · `@langchain/langgraph-cli` 1.4.4 |
 | **Frontend** | Next.js 16.3.0 · React 19.2.8 · TypeScript 5 · Tailwind 4 |
@@ -269,6 +269,111 @@ A hand-built `StateGraph` with `input` / `output` schemas: `question` in and not
 **`/generative-ui/open-generative-ui`** — ❌ **Broken (reference-only).** The runtime lets the agent stream full HTML/CSS/JS UIs into a sandbox in the chat; an advanced setup registers sandbox functions on the provider. Every setup snippet is missing for Deep Agents (`deepagents::open-gen-ui`, `open-gen-ui-advanced`); only a CDN example is printed.
 *Pass:* the gap panel renders.
 
+### Generative UI · Components and surfaces
+
+All live demos below run on `/api/copilotkit-genui` (Transports: `/api/copilotkit-genui-transports`, the page's `generativeUI: true` runtime) with the `components_agent` Deep Agents graph, which stands in for the section's TanStack `BuiltInAgent` (same prompt, no tools; `copilotkitMiddleware` passes it the run's `render_ui` tool and context). Each provider's `generativeUI` value is the page's; only `runtimeUrl` differs. Restart `npm run dev` in `backend/` so the new graph loads. None of these has been checked in a browser yet (N14).
+
+**`/generative-ui/components`** — ⚠️ **Partial.** The page's provider (`generativeUI={{ ui: standardUI }}`) and a plain chat.
+*Try:* "Compare the Starter, Team, and Enterprise plans in a table". *Pass:* a table renders in the chat as live UI, not markdown. *Fail:* a plain-text table (no `render_ui` call) or a run error (backend not restarted).
+
+**`/generative-ui/components/surfaces`** — ⚠️ **Partial.** The page's error-boundary provider over `shopUI` with two of its targets: `featured` limited to ProductGrid/ProductCard, and `sidebar-notes` with `autoScroll={false}`. `FeaturedProducts` and the per-product recommendations target are not mounted (N14).
+*Try:* "show three running shoes in the featured area". *Pass:* product cards appear in the featured box on the page, not in the chat. *Fail:* they land in the chat, or the agent says it has no such target.
+
+**`/generative-ui/components/catalogs`** — ⚠️ **Partial.** `shopUI` from "Create a catalog" (ProductGrid + ProductCard only). Combine, schema libraries and export are shown, not run (N14).
+*Try:* "show me three running shoes as product cards". *Pass:* a grid of product cards. *Fail:* standard components (Table, Card) — they are not in this catalog.
+
+**`/generative-ui/components/standard-catalog`** — ⚠️ **Partial.** Three variants: `standardUI` as is, `omit(["Map", "Video", "HtmlView"])`, and `overrides: { Card: MyCard }`. "Add your own components" is not mounted (N14).
+*Try (omit):* "show the Eiffel Tower and the Louvre on a map". *Pass:* no map — the agent uses another component or says it can't. *Try (override):* "put a short summary of our three plans in a card". *Pass:* the card has rounded-2xl corners and a shadow (MyCard).
+
+**`/generative-ui/components/state-and-actions`** — ❌ **Broken (reference-only).** Every sample needs a `Cart`/`cart` or `ProductCard` the page never defines, or is a fragment. Nothing is mounted (N14).
+
+**`/generative-ui/components/theming`** — ⚠️ **Partial.** The provider theme (amber accent, Inter, 10px radius) and the page's `.a2ui-surface` CSS; the page's dark-mode script runs on a full reload.
+*Try:* "show a card with a primary button, a slider, and a bar chart of three months". *Pass:* amber accents on the button and slider. *Fail:* default blue.
+
+**`/generative-ui/components/transports`** — ⚠️ **Partial.** Tool transport, markdown transport, and `agentIds: ["shop"]` chatting as `default`.
+*Try:* "compare the Starter, Team, and Enterprise plans in a table" in each. *Pass:* tool — the table arrives as a separate tool-call message; markdown — it sits inside the reply text; agentIds — a plain text answer (default gets no catalog). No `shop` agent is published, so the other half is not testable.
+
+**`/generative-ui/components/markdown-mode`** — ⚠️ **Partial.** Both providers: `transport: "markdown"`, and the same with `sendContext: false`.
+*Try:* "give me a seat-count slider that shows the monthly price at $29 per seat". *Pass:* the slider renders inside the reply on the first variant; the `sendContext: false` variant answers without UI (expected: its own-prompt backend is Python only).
+
+**`/generative-ui/components/from-a2ui`** — ⚠️ **Partial.** The "After" catalog (standard + `Airport` + `Arrow`). `Airport`/`Arrow` are minimal components borrowed from aws-strands-ts (the page never defines them).
+*Try:* "show a flight card from SFO (San Francisco) to JFK (New York) with a Book button". *Pass:* two airports with an arrow between them and a Book button.
+
+### Generative UI · A2UI
+
+**`/generative-ui/a2ui`** — ❌ **Broken (reference-only).** The runtime's `a2ui` option (`true`, or `{ injectA2UITool }`) and the Python `copilotkit.a2ui` helpers. For Deep Agents the agent side is Python-only and not translated here, so nothing is mounted; the route shows every printed block.
+*Pass:* the page renders the callout and code.
+
+**`/generative-ui/a2ui/dynamic-schema`** — ❌ **Broken (reference-only).** `injectA2UITool: true` gives the agent `generate_a2ui`, whose secondary LLM writes schema and data; the frontend passes a catalog via `<CopilotKit a2ui={{ catalog }}>`. The agent is Python-only for Deep Agents.
+*Pass:* the page renders the callout and code.
+
+**`/generative-ui/a2ui/fixed-schema`** — ❌ **Broken (reference-only).** A backend tool loads a fixed `flight_schema.json` and returns `a2ui.render` operations; the runtime sets `injectA2UITool: false`; buttons send `action.event.context` bound to data-model paths. Tool and agent are Python-only (and `main.py` is elided), and the schema file isn't printed.
+*Pass:* the page renders the callout and code.
+### Generative UI · Declarative
+
+**`/generative-ui/json-render`** — ❌ **Broken (reference-only).** The agent replies with a `{ root, elements }` spec and a custom `messageView.assistantMessage` renders it via `@json-render/react`. For Deep Agents the rendered page prints only the example agent output; the renderer, catalog, registry and agent are not published (the demo covers Built-in Agent and LangGraph only).
+*Pass:* the gap panel and example output render.
+
+**`/generative-ui/hashbrown`** — ❌ **Broken (reference-only).** A Hashbrown UI kit + `useJsonParser` renders the agent's streamed `{ ui: [...] }` envelope as dashboard components. Only the example envelope is printed for Deep Agents.
+*Pass:* the gap panel and example output render.
+### Generative UI · Controlled
+
+**`/generative-ui/tool-based`** — ❌ **Broken (reference-only).** `useComponent` registers a React component as a frontend tool; `copilotkitMiddleware` forwards it to the model, and a tool call renders the component inline. On the rendered Deep Agents page the `useComponent({ name: "render_bar_chart", ... })` call is a missing `deepagents::gen-ui-tool-based` snippet (no `barChartPropsSchema`, no `BarChart`), and the agent + system prompt are Python-only. The route shows everything the page does print.
+*Pass:* the gap panel renders.
+
+**`/prebuilt-components/chat`** → `sample_agent` — ⚠️ Partial. The base inline chat surface, sized by its container. The rendered Deep Agents page prints only `import { CopilotKit, CopilotChat } from "@copilotkit/react-core/v2"` and the stylesheet; its usage example is a missing `deepagents::agentic-chat` ×2 snippet, so the demo mounts `<CopilotChat agentId="sample_agent" />` with nothing else (labelled).
+*Try:* `What's the weather in Lisbon?` *Pass:* a streamed reply saying Lisbon is sunny. *Fail:* no reply — check `/quickstart`. Not yet browser-checked.
+
+**`/prebuilt-components/sidebar`** → `sample_agent` — ⚠️ Partial. A collapsible chat docked beside the main content, opened by a launcher. The rendered Deep Agents page prints only `import { CopilotKit, CopilotSidebar } from "@copilotkit/react-core/v2"` and the stylesheet; its usage example is a missing `deepagents::prebuilt-sidebar` ×2 snippet, so the demo mounts `<CopilotSidebar agentId="sample_agent" />` with nothing else (labelled).
+*Try:* `What's the weather in Lisbon?` *Pass:* a streamed reply saying Lisbon is sunny. *Fail:* no reply — check `/quickstart`. Not yet browser-checked.
+
+**`/prebuilt-components/popup`** → `sample_agent` — ⚠️ Partial. A floating launcher that opens an overlay chat window. The rendered Deep Agents page prints only `import { CopilotKit, CopilotPopup } from "@copilotkit/react-core/v2"` and the stylesheet; its usage example is a missing `deepagents::prebuilt-popup` snippet, so the demo mounts `<CopilotPopup agentId="sample_agent" />` with nothing else (labelled).
+*Try:* `What's the weather in Lisbon?` *Pass:* a streamed reply saying Lisbon is sunny. *Fail:* no reply — check `/quickstart`. Not yet browser-checked.
+
+**`/prebuilt-components/chat-controls`** → `sample_agent` — ⚠️ Partial. One surface, laid out as in the aws-strands-ts harness: a `CopilotChatConfigurationProvider isModalDefaultOpen={false}` owns modal state; **Ask the assistant (Popup)** opens a `CopilotPopup` via `open`/`onOpenChange`; **Open/Close Sidebar** toggles a left `CopilotSidebar` through `setModalOpen`; the sidebar's `onThumbsUp`/`onThumbsDown` append to a **Feedback recorded** list.
+*Try:* "Say something I can rate." in the sidebar, then click a thumb; use both buttons.
+*Pass:* the Popup button opens the popup, the toggle's label tracks the sidebar, and each thumb appends a line with the message id. *Fail:* the buttons render nothing (outside a provider that owns modal state).
+Not yet browser-checked.
+### Custom Look and Feel
+
+**`/custom-look-and-feel/css`** → `sample_agent` — ⚠️ Partial. Three tabs: the page's `[data-copilotkit]` v2 token overrides, its `.copilotKit*` class and font rules, and `CopilotChat labels={...}`. The CSS is injected only while its tab is mounted instead of into `globals.css`, so it doesn't restyle the rest of the harness.
+*Try:* send `hi` on each tab.
+*Pass:* indigo accents and the 0.625rem radius on the token tab; blue user bubbles and padded message list on the class tab; the custom welcome text and placeholder on the labels tab.
+*Fail:* a tab identical to the default chat. *Not mounted:* the v1 `CopilotKitCSSProperties` sample (`@copilotkit/react-ui` not installed) and the page's `theme.css` example (missing `deepagents::chat-customization-css` snippet). Not yet browser-checked.
+
+**`/custom-look-and-feel/slots`** → `sample_agent` — ⚠️ Partial. One tab per sample: Tailwind class strings, props override, a custom `messageView` component, nested slots, a three-levels-deep `copyButton`, a wrapped `toolCallsView`, and `labels`.
+*Try:* `hi` on each tab; on **toolCallsView**, `What's the weather in Paris?`.
+*Pass:* each tab visibly differs from the default chat as its sample says (grey message area + blue input, custom text-only message list with `Thinking...`, dashed custom user bubble and `Copy (custom)`, plain `Copy`, dashed tool-call box, custom placeholder/welcome/disclaimer).
+*Fail:* a tab rendering the stock chat. *Gaps:* the page's welcome/assistant/disclaimer example is a missing `deepagents::chat-slots` snippet; the nested-slot components are labelled stand-ins. Not yet browser-checked.
+
+**`/custom-look-and-feel/markdown`** → `sample_agent` — ⚠️ Partial (unchecked). Three tabs: a Streamdown `components` map overriding `a` and `h2`, a `text-sm leading-7` class string, and a `PlainText` replacement renderer.
+*Try:* `Reply with a level-2 heading 'Links' and a markdown link to https://copilotkit.ai`.
+*Pass:* orange heading bar and dotted link (marker CSS is harness-only) with `target`/`rel` intact; smaller text on the class tab; raw markdown in a `<pre>` on the replace tab.
+*Fail:* stock styling on the first tab, or a `node="[object Object]"` attribute.
+
+**`/custom-look-and-feel/headless-ui`** — ❌ **Broken (reference-only).** The page describes a chat with no `CopilotChat`: `useAgent` for messages, `useCopilotKit().copilotkit.runAgent` to send, `useRenderToolCall` for tool calls, and a complete version that re-creates `CopilotChatMessageView` with `useRenderActivityMessage` and `useRenderCustomMessages`. All five code cells are missing `deepagents::headless-*` snippets (the `.md` fences are empty too).
+*Pass:* the gap panel renders.
+
+**`/custom-look-and-feel/reasoning-messages`** → `sample_agent` — ❌ Broken. The page's `CustomHeader`, `CustomContent` and `MyReasoningLayout` are mounted in four tabs on `messageView.reasoningMessage`. The agent that streams reasoning (`deepagents::reasoning-default` / `reasoning-custom`) is not published, so the slots run on `sample_agent`, which emits none.
+*Try:* `Think step by step: what is 17 × 23?`
+*Expected here:* a normal reply and no reasoning card. *Pass with a reasoning agent:* 🧠/💡 header, monospace content with a cursor, yellow card on the layout tab.
+### Chat
+
+**`/multimodal-attachments`** → `sample_agent` — ⚠️ Partial. Every `attachments={...}` sample on the page as its own tab: quick start, `accept` + `maxSize`, `onUpload` returning base64 `data`, `onUpload` POSTing to `/api/upload` for a URL, `maxConcurrentUploads`, `onUploadFailed`, and `onError`. The page's `agentId="my-agent"` becomes `sample_agent`.
+*Try:* on **Quick start**, attach a PNG and ask `What is in this image?`; on **accept + maxSize**, attach a `.zip`.
+*Pass:* a thumbnail chip before sending and a reply describing the image; the `.zip` is refused before upload.
+*Fail:* a `RUN_ERROR` after sending an image. *Expected failures:* the three ✗ tabs — `/api/upload` has no handler (404), `uploadToStorage` and `toast` are undefined (ReferenceError). Not yet browser-checked.
+
+**`/voice`** — ❌ **Broken (reference-only).** The page explains that a `transcriptionService` on the v2 runtime makes `/info` report `audioFileTranscriptionEnabled`, which makes `CopilotChat` render a mic that POSTs audio to `/transcribe`. On the rendered Deep Agents page all four code cells are missing `deepagents::voice` snippets, so nothing is mounted; this runtime has no transcription service and no chat here shows a mic.
+*Pass:* the gap panel renders.
+
+**`/generative-ui/reasoning`** — ❌ **Broken (reference-only).** Models that stream reasoning produce `REASONING_MESSAGE_*` events that `CopilotChat` renders as a built-in "Thinking…" card, or through a custom `messageView.reasoningMessage` slot. Every code cell on the rendered Deep Agents page is a missing `deepagents::reasoning-default` / `deepagents::reasoning-custom` snippet, so nothing is mounted.
+*Pass:* the gap panel renders.
+### Agent capabilities
+
+**`/multi-agent/subagents`** — ❌ **Broken (reference-only).** The page teaches a supervisor that delegates to research / writing / critique sub-agents exposed as tools, logging each delegation into a shared `delegations` state slot that the UI renders live. On the rendered Deep Agents page all three code cells are "Missing snippet — No demo found for `deepagents::subagents`", so there is nothing to run: the route explains the pattern, lists the missing cells, and shows the two inline fragments the prose does print (`useAgent({ updates: [...] })`, `agent.state.delegations`).
+*Pass:* the page renders the gap panel. *There is no live demo to fail.*
+
 ---
 
 ## 8. Testing checklist / current status
@@ -297,8 +402,37 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | [intelligence/quickstart](https://docs.copilotkit.ai/deepagents/intelligence/quickstart) | `/intelligence/quickstart` | `sample_agent` | ⚠️ Partial | Single-route transport implemented and exercised; the hosted-project steps still need `CPK_INTELLIGENCE_API_KEY` |
 | [generative-ui/mcp-apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps) | `/generative-ui/mcp-apps` | `sample_agent` | ⚠️ Partial | Page route mounted at `/api/copilotkit-mcp-apps`; needs `LANGGRAPH_DEPLOYMENT_URL` (page falls back to 8123); not yet browser-checked |
 | [generative-ui/open-generative-ui](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) | `/generative-ui/open-generative-ui` | — | ❌ Broken | Reference-only: all setup snippets missing for Deep Agents |
+| [generative-ui/components](https://docs.copilotkit.ai/deepagents/generative-ui/components) | `/generative-ui/components` | `components_agent` | ⚠️ Partial | Live: `standardUI` provider. `BuiltInAgent` → `components_agent` (Deep Agents). Not yet browser-checked. N14 |
+| [generative-ui/components/surfaces](https://docs.copilotkit.ai/deepagents/generative-ui/components/surfaces) | `/generative-ui/components/surfaces` | `components_agent` | ⚠️ Partial | Live: error-boundary provider, `featured` (limited) and `sidebar-notes` targets. Broken: `FeaturedProducts`, per-item target (undefined `products`/`Product`/`product`). N14 |
+| [generative-ui/components/catalogs](https://docs.copilotkit.ai/deepagents/generative-ui/components/catalogs) | `/generative-ui/components/catalogs` | `components_agent` | ⚠️ Partial | Live: `shopUI`. Broken: Combine (undefined `cartUI`) and export; schema libraries and positional order are fragments. N14 |
+| [generative-ui/components/standard-catalog](https://docs.copilotkit.ai/deepagents/generative-ui/components/standard-catalog) | `/generative-ui/components/standard-catalog` | `components_agent` | ⚠️ Partial | Live: as is, `omit`, `overrides`. Broken: extend (undefined `ProductCard`, `productSchema`). N14 |
+| [generative-ui/components/state-and-actions](https://docs.copilotkit.ai/deepagents/generative-ui/components/state-and-actions) | `/generative-ui/components/state-and-actions` | `components_agent` | ❌ Broken | Reference-only: needs undefined `Cart`/`cart`/`ProductCard`, or fragments. N14 |
+| [generative-ui/components/theming](https://docs.copilotkit.ai/deepagents/generative-ui/components/theming) | `/generative-ui/components/theming` | `components_agent` | ⚠️ Partial | Live: provider theme, CSS variables, dark-mode script. Per-mode/map fragments and theme file shown only. N14 |
+| [generative-ui/components/transports](https://docs.copilotkit.ai/deepagents/generative-ui/components/transports) | `/generative-ui/components/transports` | `components_agent` | ⚠️ Partial | Live on `generativeUI: true` runtime: tool, markdown, `agentIds` as default. No `shop` agent published. N14 |
+| [generative-ui/components/markdown-mode](https://docs.copilotkit.ai/deepagents/generative-ui/components/markdown-mode) | `/generative-ui/components/markdown-mode` | `components_agent` | ⚠️ Partial | Live: both providers; `sendContext: false` shows no UI (Python-only backend). N14 |
+| [generative-ui/components/from-a2ui](https://docs.copilotkit.ai/deepagents/generative-ui/components/from-a2ui) | `/generative-ui/components/from-a2ui` | `components_agent` | ⚠️ Partial | Live: After catalog; `Airport`/`Arrow` borrowed from aws-strands-ts. N14 |
+| [generative-ui/a2ui](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui) | `/generative-ui/a2ui` | — | ❌ Broken | Reference-only: agent side Python-only; runtime snippets use undefined `myAgent` |
+| [generative-ui/a2ui/dynamic-schema](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/dynamic-schema) | `/generative-ui/a2ui/dynamic-schema` | — | ❌ Broken | Reference-only: agent Python-only; `myCatalog` / `myAgent` undefined |
+| [generative-ui/a2ui/fixed-schema](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/fixed-schema) | `/generative-ui/a2ui/fixed-schema` | — | ❌ Broken | Reference-only: tool + agent Python-only, `main.py` elided, schema file not printed |
+| [generative-ui/json-render](https://docs.copilotkit.ai/deepagents/generative-ui/json-render) | `/generative-ui/json-render` | — | ❌ Broken | Reference-only: only the example agent output is printed for Deep Agents |
+| [generative-ui/hashbrown](https://docs.copilotkit.ai/deepagents/generative-ui/hashbrown) | `/generative-ui/hashbrown` | — | ❌ Broken | Reference-only: only the example agent envelope is printed for Deep Agents |
+| [generative-ui/tool-based](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) | `/generative-ui/tool-based` | — | ❌ Broken | Reference-only: `useComponent` registration missing for Deep Agents; backend Python-only |
+| [prebuilt-components/chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat) | `/prebuilt-components/chat` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::agentic-chat` ×2 snippet; minimal labelled mount |
+| [prebuilt-components/sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) | `/prebuilt-components/sidebar` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::prebuilt-sidebar` ×2 snippet; minimal labelled mount |
+| [prebuilt-components/popup](https://docs.copilotkit.ai/deepagents/prebuilt-components/popup) | `/prebuilt-components/popup` | `sample_agent` | ⚠️ Partial | Import line only; usage is a missing `deepagents::prebuilt-popup` snippet; minimal labelled mount |
+| [prebuilt-components/chat-controls](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat-controls) | `/prebuilt-components/chat-controls` | `sample_agent` | ⚠️ Partial | Layout matches aws-strands-ts; undefined `analytics` replaced by a local Feedback list (N10). Not yet browser-checked |
+| [custom-look-and-feel/css](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css) | `/custom-look-and-feel/css` | `sample_agent` | ⚠️ Partial | Token / class / labels samples mounted; theme.css example missing for Deep Agents; v1 sample not mountable. Not yet browser-checked |
+| [custom-look-and-feel/slots](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots) | `/custom-look-and-feel/slots` | `sample_agent` | ⚠️ Partial | Generic samples mounted; worked example missing for Deep Agents; 3 stand-in components; 2 `@ts-expect-error`. Not yet browser-checked |
+| [custom-look-and-feel/markdown](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown) | `/custom-look-and-feel/markdown` | `sample_agent` | ⚠️ Partial | All 3 samples mounted as printed; not yet browser-checked |
+| [custom-look-and-feel/headless-ui](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) | `/custom-look-and-feel/headless-ui` | — | ❌ Broken | Reference-only: all 5 code cells missing (`deepagents::headless-simple`, `headless-complete`); `.md` fences empty |
+| [custom-look-and-feel/reasoning-messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages) | `/custom-look-and-feel/reasoning-messages` | `sample_agent` | ❌ Broken | Slot code mounted; the reasoning agent is a missing `deepagents::reasoning-*` snippet, so no card can appear |
+| [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) | `/multimodal-attachments` | `sample_agent` | ⚠️ Partial | Frontend-only; 3 of 7 tabs use undefined helpers (`uploadToStorage`, `toast`, `/api/upload`). Not yet browser-checked |
+| [voice](https://docs.copilotkit.ai/deepagents/voice) | `/voice` | — | ❌ Broken | Reference-only: all 4 code cells are missing `deepagents::voice` snippets |
+| [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) | `/generative-ui/reasoning` | — | ❌ Broken | Reference-only: all code cells are missing `deepagents::reasoning-*` snippets |
+| [multi-agent/subagents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) | `/multi-agent/subagents` | — | ❌ Broken | Reference-only: every code cell on the rendered page is a missing `deepagents::subagents` snippet |
 
 **Totals:** 11 ✅ Working · 4 ⚠️ Partial · 2 📄 Reference (Input/Output Schemas, Workflow Execution) · 0 ❌ Broken · 1 🚧 Not started.
+**2026-11 doc sync (Agent capabilities):** +1 ❌ Broken (Sub-agents, reference-only).
 
 **Tracked without a demo.** The three 🚧 rows carry a route, a nav entry and a snapshot so drift is watched, but nothing is implemented behind them and the recorder does not touch them. The reason is on each route’s page and in §7. The rest of `/deepagents/intelligence/` is the old `/deepagents/premium/` set under a new prefix and stays in `doc-snapshot/manifest.json`’s `knownUnmapped` list.
 
@@ -376,6 +510,19 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 **N15. MCP Apps: port fallback and an unlisted package.** [generative-ui/mcp-apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps)'s route falls back to `http://localhost:8123` for the LangGraph server and exports only `GET`/`POST`. It imports `MCPAppsMiddleware` from `@ag-ui/mcp-apps-middleware` without telling you to install it; it resolves here only because `@copilotkit/runtime` 1.72.0 depends on 0.1.1. Kept as printed at `/api/copilotkit-mcp-apps` (its own mount, `basePath` changed to match). Watch for an `@ag-ui/client` type clash on `agent.use(...)`: the root pins `@ag-ui/client` 1.0.0 while CopilotKit 1.72 nests 0.0.59 (see AGENTS.md). tsc rejects `agents: { sample_agent: agent }` (TS2769): the `LangGraphAgent` comes from the root `@ag-ui/client` 1.0.0 while CopilotKit 1.72 types `AbstractAgent` against its nested 0.0.59, so the message types differ; suppressed with `@ts-expect-error`, the fix is aligning the `@ag-ui` pins (dependency PR, out of scope here).
 
 **N16. Open Generative UI publishes no Deep Agents setup.** [generative-ui/open-generative-ui](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) renders "No demo found" for `deepagents::open-gen-ui` (×2) and `deepagents::open-gen-ui-advanced` (×2): runtime enablement, chat page and sandbox-function provider are all missing. Only a CDN `<script>` example is printed. Reference-only, ❌ Broken.
+**N14. Components and surfaces: upgraded CopilotKit, a Deep Agents stand-in agent, and what stays broken.** All nine [generative-ui/components](https://docs.copilotkit.ai/deepagents/generative-ui/components) pages build on `@copilotkit/react-core/v2/generative-ui`, absent in the 1.72.0 this repo locked. The frontend now uses `@copilotkit/*` ^1.87.0 with `@ag-ui/client`/`@ag-ui/core` pinned to 1.0.2, the exact version CopilotKit 1.87.0 depends on (a looser pin installs a second copy and breaks `AbstractAgent` types). The section's runtime prints a TanStack `BuiltInAgent`; per AGENTS.md rule 2 it is the `components_agent` Deep Agents graph (`backend/src/componentsAgent.ts`: the page's prompt, no tools, `copilotkitMiddleware`), served from `/api/copilotkit-genui` and, for Transports, `/api/copilotkit-genui-transports` (`generativeUI: true`). Not filled in, so broken: Surfaces' `FeaturedProducts` (`Product`, `products`) and per-item target (`product`); Catalogs' `cartUI` (Combine and export); Standard catalog's `ProductCard`/`productSchema`; all of State and actions (`Cart`, `cart`, `ProductCard`, fragments); Transports' `shop` agent. Fragments with no surrounding code (theme `dark`/`mapStyle`, schema-library `props` lines, positional-order catalog) are shown, not run. Borrowed, labelled: `Airport` and `Arrow` (Adopt from A2UI) from aws-strands-ts. The rendered Standard catalog page redirects to the generic `/generative-ui/components/standard-catalog`, whose code is used.
+**N13. A2UI pages are Python-only on the agent side.** [a2ui](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui), [dynamic-schema](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/dynamic-schema) and [fixed-schema](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/fixed-schema) print their agents and tools only in Python (`copilotkit.a2ui` helpers, `agent/a2ui_dynamic.py`, the `search_flights` tool, an elided `main.py` with `tools=[search_flights, ...]`). The TypeScript parts are runtime fragments registering an undefined `myAgent`, and a `<CopilotKit a2ui={{ catalog: myCatalog }}>` with an undefined `myCatalog`. `flight_schema.json` is never printed beyond one button entry. Per AGENTS.md the Python is not translated; all three routes are reference-only, ❌ Broken.
+**N12. JSON Render and Hashbrown print no Deep Agents code.** [json-render](https://docs.copilotkit.ai/deepagents/generative-ui/json-render) and [hashbrown](https://docs.copilotkit.ai/deepagents/generative-ui/hashbrown) render only an example agent-output JSON each; their demo picker and Code tab cover Built-in Agent and LangGraph, not Deep Agents. The `.md` fallbacks are another framework's demo files importing unpublished modules (`./registry`, `./types`, `./suggestions`, chart components). Both routes are reference-only, ❌ Broken; `@json-render/*` and `@hashbrownai/*` are not installed.
+**N11. Components as Tools: no frontend registration, Python-only backend.** [generative-ui/tool-based](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) prints only the `useComponent` / `zod` imports; the registration itself is a missing `deepagents::gen-ui-tool-based` snippet, and its `barChartPropsSchema` and `BarChart` are never shown. The backend (`create_deep_agent` + `CopilotKitMiddleware` + `SYSTEM_PROMPT`) is printed only in Python. Reference-only, ❌ Broken. The headless `CopilotChatToolCallsView` fragment also uses undefined `assistantMessage` / `allMessages`.
+**N9. Prebuilt component pages print only an import.** [chat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat), [sidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) and [popup](https://docs.copilotkit.ai/deepagents/prebuilt-components/popup) each render the `import { CopilotKit, <Component> } ...` line and then "No demo found" for `deepagents::agentic-chat`, `deepagents::prebuilt-sidebar` and `deepagents::prebuilt-popup`. The demos mount the component with only `agentId="sample_agent"`, a prop from each page's table, labelled as not from the page.
+
+**N10. Chat controls' feedback sample uses an undefined `analytics`.** [prebuilt-components/chat-controls](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat-controls)'s `onThumbsUp` / `onThumbsDown` call `analytics.track(...)` with no import or definition. The route follows the aws-strands-ts harness and records each thumb into local state (a Feedback list) instead of calling it. The page's toggle sample is a lone `<button>` line reading `config`; it is wrapped in the same guard as `OpenChatButton`, and `OpenChatButton` drives a `CopilotPopup` via `open`/`onOpenChange` rather than calling `setModalOpen(true)` (both labelled in the source).
+**N2. Multimodal Attachments uses helpers it never defines.** [multimodal-attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments) calls `uploadToStorage(file)` (metadata and concurrency samples), reads `currentUser.id` (metadata), calls `toast.error` with no import (`onUploadFailed`), and POSTs to an `/api/upload` route it never publishes (URL sample). Kept as printed; `@ts-expect-error` on the two undefined names. Those tabs fail at upload time. The page's first sample also targets `agentId="my-agent"`. Its `onError={(event) => console.error(`[${event.code}]`, event.error.message)}` sample fails `tsc` at react-core 1.72 (TS2339: `code` / `error` don't exist on the event union); kept with `@ts-expect-error`.
+
+**N3. Voice publishes no Deep Agents code.** [voice](https://docs.copilotkit.ai/deepagents/voice) renders four "No demo found for `deepagents::voice`" boxes (frontend page, sample-audio button, `/api/copilotkit-voice` runtime route, transcription service). The `.md` fallback imports an unpublished `@/lib/transcription-service` and `VoiceChat`. Reference-only, ❌ Broken.
+
+**N4. Reasoning publishes no Deep Agents code.** [generative-ui/reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) renders "No demo found" for `deepagents::reasoning-default` (1 cell) and `deepagents::reasoning-custom` (2 cells), and publishes no agent that emits reasoning. The `.md` fallback also calls unpublished `useReasoning*Suggestions` hooks and a `ReasoningBlock` component. Reference-only, ❌ Broken.
+**N1. Sub-agents publishes no Deep Agents code.** [multi-agent/subagents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) renders "Missing snippet — No demo found for `deepagents::subagents`" in all three code cells (sub-agent setup, supervisor tools, delegation-log component). The `.md` export's fallback is LangGraph Python (`create_agent`, `HeaderForwardingMiddleware` from an unpublished `src.agents._header_forwarding_middleware`) and a showcase `DelegationLog` that uses undefined `SUB_AGENT_STYLE`, `SubAgentName` and `DelegationLogProps`. Nothing was written in their place; `/multi-agent/subagents` is reference-only, ❌ Broken. The page's own callout also warns that the fallback's `operator.add` reducer doubles the log on continued threads.
 
 ### Where the TypeScript tabs are *better* than the Python ones
 
@@ -593,5 +740,41 @@ Grouped the way the doc nav groups them. Every link below was read in its **Type
 **Generative UI · Open-ended**
 - [MCP Apps](https://docs.copilotkit.ai/deepagents/generative-ui/mcp-apps)
 - [Open Generative UI](https://docs.copilotkit.ai/deepagents/generative-ui/open-generative-ui) — reference-only
+**Generative UI · Components and surfaces**
+- [Components and surfaces](https://docs.copilotkit.ai/deepagents/generative-ui/components) — live (partial)
+- [Surfaces](https://docs.copilotkit.ai/deepagents/generative-ui/components/surfaces) — live (partial)
+- [Catalogs](https://docs.copilotkit.ai/deepagents/generative-ui/components/catalogs) — live (partial)
+- [Standard catalog](https://docs.copilotkit.ai/deepagents/generative-ui/components/standard-catalog) — live (partial)
+- [State and actions](https://docs.copilotkit.ai/deepagents/generative-ui/components/state-and-actions) — reference only
+- [Theming](https://docs.copilotkit.ai/deepagents/generative-ui/components/theming) — live (partial)
+- [Transports](https://docs.copilotkit.ai/deepagents/generative-ui/components/transports) — live (partial)
+- [Markdown mode](https://docs.copilotkit.ai/deepagents/generative-ui/components/markdown-mode) — live (partial)
+- [Adopt from A2UI](https://docs.copilotkit.ai/deepagents/generative-ui/components/from-a2ui) — live (partial)
+**Generative UI · A2UI**
+- [A2UI](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui) — reference-only (Python-only agent side)
+- [Dynamic Schema A2UI](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/dynamic-schema) — reference-only
+- [Fixed Schema A2UI](https://docs.copilotkit.ai/deepagents/generative-ui/a2ui/fixed-schema) — reference-only
+**Generative UI · Declarative**
+- [JSON Render](https://docs.copilotkit.ai/deepagents/generative-ui/json-render) — reference-only
+- [Hashbrown](https://docs.copilotkit.ai/deepagents/generative-ui/hashbrown) — reference-only
+**Generative UI · Controlled**
+- [Components as Tools](https://docs.copilotkit.ai/deepagents/generative-ui/tool-based) — reference-only
+**Basics · Prebuilt Components**
+- [CopilotChat](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat) — import line only for Deep Agents
+- [CopilotSidebar](https://docs.copilotkit.ai/deepagents/prebuilt-components/sidebar) — import line only for Deep Agents
+- [CopilotPopup](https://docs.copilotkit.ai/deepagents/prebuilt-components/popup) — import line only for Deep Agents
+- [Open, close, and feedback](https://docs.copilotkit.ai/deepagents/prebuilt-components/chat-controls)
+**Custom Look and Feel**
+- [CSS Customization](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/css)
+- [Slots (Subcomponents)](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/slots)
+- [Markdown Rendering](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/markdown)
+- [Headless UI](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/headless-ui) — reference-only, no snippet published
+- [Reasoning Messages](https://docs.copilotkit.ai/deepagents/custom-look-and-feel/reasoning-messages)
+**Chat**
+- [Multimodal Attachments](https://docs.copilotkit.ai/deepagents/multimodal-attachments)
+- [Voice](https://docs.copilotkit.ai/deepagents/voice) — reference-only, no Deep Agents snippet published
+- [Reasoning](https://docs.copilotkit.ai/deepagents/generative-ui/reasoning) — reference-only, no Deep Agents snippet published
+**Agent capabilities**
+- [Sub-agents](https://docs.copilotkit.ai/deepagents/multi-agent/subagents) — reference-only, no Deep Agents snippet published
 
 **Not covered by this repo.** The Deep Agents sidebar also lists the Human in the Loop overview (its Governed Actions sub-page is tracked above), and the rest of the Intelligence Platform group (Rich Threads, Headless Threads, Thread & History Lifecycle, Synchronize Thread History, and four premium pages). Those were outside the scope requested for this build.
