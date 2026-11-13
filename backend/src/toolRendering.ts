@@ -7,6 +7,11 @@
  * point of the page is on the frontend, where `useRenderTool({ name:
  * "get_weather" })` replaces the default tool-call bubble with a component.
  *
+ * Model: the page prints `model: "openai:gpt-6-luna"` (was `openai:gpt-4o`
+ * until the 2026-11 doc sync). This repo keeps reading `MODEL` from
+ * `shared.ts` (`OPENAI_MODEL`, default `gpt-4o`) as every env-driven agent
+ * here does; set `OPENAI_MODEL=gpt-6-luna` to run the page's literal.
+ *
  * `copilotkitMiddleware` is not on the page's snippet and is not added here
  * either: this route renders a backend tool, it does not call frontend ones.
  */

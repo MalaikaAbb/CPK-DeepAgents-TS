@@ -519,6 +519,7 @@ It returns [state-inputs-outputs](https://docs.copilotkit.ai/deepagents/shared-s
 
 **12. Model ids vary across pages.**
 `openai:gpt-4o`, `gpt-5.4`, `gpt-4o-mini` all appear. Every agent here reads `OPENAI_MODEL`, defaulting to `gpt-4o`.
+The 2026-11 doc sync moved [state-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/state-rendering) (from `gpt-5.4`) and [tool-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/tool-rendering) (from `gpt-4o`) to `openai:gpt-6-luna`. State Rendering's agent hardcodes its page's literal, so `state_rendering_agent` now runs `gpt-6-luna` and fails if the OpenAI key has no access to that model; Tool Rendering still reads `OPENAI_MODEL`. The Python tabs now build `ChatOpenAI(model="gpt-6-luna", reasoning_effort="none")`; the TypeScript tabs pass only the string, with no reasoning-effort setting.
 
 ### 2026-11 doc sync: new pages
 
