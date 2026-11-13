@@ -7,7 +7,10 @@ const SLOT_SNIPPET = `<CopilotThreadsDrawer>
 </CopilotThreadsDrawer>`;
 
 const PROPS: [string, string][] = [
-  ["agentId", "Agent whose threads to list. Defaults to the chat configuration's agent."],
+  [
+    "agentId",
+    "Agent whose threads to list. Falls back to the chat configuration's agent, then the provider's agentId, then \"default\".",
+  ],
   [
     "label",
     'Accessible name for the drawer region and thread listbox. Defaults to "Threads".',
@@ -46,7 +49,7 @@ export default function Page() {
         <div className="mt-4">
           <TryIt
             prompts={["Say hello", "then click New Conversation and say hello again"]}
-            expect="Two rows in the drawer. Clicking the first replays its messages into the chat; clicking New Conversation clears back to the welcome screen."
+            expect="Two rows in the drawer. Clicking the first replays its messages into the chat; clicking New Conversation clears back to the welcome screen. On the other tabs: the sidebar chat drives the drawer the same way; the header button starts a fresh thread and deselects the row (with the checkbox on, the drawer's own New Conversation row disappears); on the app-controlled tab both the drawer row and the plain button change the threadId held in React state."
             fail="The drawer shows an Upgrade button instead of a list. That is the no-license-token state, not a threads failure — see the callout below, and check /headless-threads to confirm threads themselves work."
           />
         </div>
@@ -98,6 +101,48 @@ export default function Page() {
           the drawer is locked.
         </p>
       </Callout>
+
+      <Panel
+        title="What the 2026-11 doc sync added"
+        description="Three new code samples, each its own tab in the demo."
+      >
+        <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+          <li>
+            <strong>Sidebar host.</strong> <code>CopilotSidebar</code> renders a{" "}
+            <code>CopilotChat</code> internally, so it picks up the same shared
+            configuration as the drawer. The sample renders a{" "}
+            <code>YourMainContent</code> it never defines; the demo uses a
+            labelled placeholder (not from the doc page).
+          </li>
+          <li>
+            <strong>Your own New-conversation button.</strong>{" "}
+            <code>useCopilotChatConfiguration()</code> exposes{" "}
+            <code>startNewThread()</code>, the same call the drawer&apos;s row
+            makes. Two <code>::part()</code> selectors hide the drawer&apos;s own
+            new-thread controls; the demo has a checkbox that injects them.
+          </li>
+          <li>
+            <strong>App-controlled thread.</strong> With <code>threadId</code>{" "}
+            set on the provider, the drawer&apos;s own selection becomes a no-op
+            and you pass <code>onThreadSelect</code> / <code>onNewThread</code>{" "}
+            instead.
+          </li>
+          <li>
+            <strong>Agent resolution.</strong> The drawer lists one agent&apos;s
+            threads: its own <code>agentId</code>, else the nearest chat
+            configuration&apos;s, else the provider&apos;s, else{" "}
+            <code>&quot;default&quot;</code>. This runtime has no{" "}
+            <code>&quot;default&quot;</code> agent, so every tab sets{" "}
+            <code>agentId</code> once on the shared configuration provider, as
+            the page suggests for moving drawer and chat together.
+          </li>
+          <li>
+            The page now also warns that the drawer is v2-only and that{" "}
+            <code>@copilotkit/react-ui</code> exports same-named v1 components.
+            Everything here imports from <code>@copilotkit/react-core/v2</code>.
+          </li>
+        </ul>
+      </Panel>
 
       <Panel title="Source">
         <SourceCode file="frontend/src/app/prebuilt-components/copilot-threads-drawer/demo-chat/page.tsx" />

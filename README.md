@@ -182,6 +182,8 @@ The drop-in conversation sidebar. A `CopilotThreadsDrawer` and a `CopilotChat` i
 *Try:* send a message, then press **New Conversation** and send another.
 *Pass:* two rows in the drawer; clicking between them swaps the transcript.
 *Fail:* a locked "Threads are a CopilotKit Intelligence feature" panel — that is `licenseStatus`, not a bug. See the Quickstart's Live connection panel.
+Since the 2026-11 doc sync the demo has four tabs, one per sample on the page: drawer + `CopilotChat`, drawer + `CopilotSidebar` (the page's undefined `YourMainContent` is a labelled placeholder), an app-owned **New conversation** button calling `useCopilotChatConfiguration()?.startNewThread()` (with a checkbox applying the page's `::part(new-thread-button)` / `::part(launcher-new-thread)` CSS), and the `ControlledChat` sample where the app holds `threadId` and the drawer gets `onThreadSelect` / `onNewThread`. The three new tabs have not yet been checked in a browser.
+*Try (new tabs):* on **Own New-conversation button**, send a message, press the header button — the chat returns to the welcome screen and no drawer row stays selected; the new thread only gets a row after its first run.
 
 ### Rich Threads
 
@@ -393,7 +395,7 @@ Verified 2026-08-06 by driving every graph through the real `CopilotRuntime` rou
 | Doc page | Route | Graph | Status | Notes |
 |---|---|---|---|---|
 | [quickstart](https://docs.copilotkit.ai/deepagents/quickstart) | `/quickstart` | `sample_agent` | ✅ Working | TypeScript tab + Deep Agent runtime tab |
-| [prebuilt-components/copilot-threads-drawer](https://docs.copilotkit.ai/deepagents/prebuilt-components/copilot-threads-drawer) | `/prebuilt-components/copilot-threads-drawer` | `sample_agent` | ✅ Working | Needs Intelligence mode; the unlocked view needs a license token |
+| [prebuilt-components/copilot-threads-drawer](https://docs.copilotkit.ai/deepagents/prebuilt-components/copilot-threads-drawer) | `/prebuilt-components/copilot-threads-drawer` | `sample_agent` | ✅ Working | Needs Intelligence mode; the unlocked view needs a license token. Sidebar / own-button / controlled tabs added 2026-11, not yet browser-checked |
 | [headless-threads](https://docs.copilotkit.ai/deepagents/headless-threads) | `/headless-threads` | `sample_agent` | ✅ Working | Rename/archive/delete need `mutations: true`, i.e. Intelligence mode |
 | [threads-lifecycle](https://docs.copilotkit.ai/deepagents/threads-lifecycle) | `/threads-lifecycle` | `sample_agent` | ✅ Working | Switch/start are live regardless; replay needs a server-side store |
 | [generative-ui/tool-rendering](https://docs.copilotkit.ai/deepagents/generative-ui/tool-rendering) | `/generative-ui/tool-rendering` | `tool_rendering_agent` | ✅ Working | `useDefaultRenderTool` destructures a prop that doesn't exist |
